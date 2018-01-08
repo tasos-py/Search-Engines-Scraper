@@ -34,15 +34,15 @@ class Search(object):
 		return self.http.post(page, data, ref) if data else self.http.get(page, ref)
 	
 	def _get_url(self, link, item='href'): 
-		'''Returns the URL of search results item.'''
+		'''Returns the URL of search results items.'''
 		return self._get_tag_attr(link.select_one(self._url), item)
 	
 	def _get_title(self, link, item='text'): 
-		'''Returns the title of search results item.'''
+		'''Returns the title of search results items.'''
 		return self._get_tag_attr(link.select_one(self._title), item)
 	
 	def _get_text(self, link, item='text'): 
-		'''Returns the text of search results item.'''
+		'''Returns the text of search results items.'''
 		return self._get_tag_attr(link.select_one(self._text), item)
 	
 	def _filter(self, query): 
@@ -55,7 +55,7 @@ class Search(object):
 		return (query, filter)
 	
 	def _items(self, link): 
-		'''Creates a dictionary from the link.'''
+		'''Returns a dictionary of the link items.'''
 		url = self._get_url(link)
 		return {'domain':utl._domain(url), 'link':url, 'title':self._get_title(link), 'text':self._get_text(link)} 
 	
