@@ -4,7 +4,6 @@ from .utilities import unquote, _write
 
 
 class Google(Search): 
-	'''Searches google'''
 	_url = 'a[href]'
 	_title = 'a'
 	_text = 'span.st'
@@ -35,7 +34,6 @@ class Google(Search):
 
 
 class Bing(Search):
-	'''Searches bing'''
 	_url = 'a[href]'
 	_title = 'a'
 	_text = 'p'
@@ -59,7 +57,6 @@ class Bing(Search):
 
 
 class Yahoo(Search):
-	'''Searches yahoo'''
 	_url = 'div.compTitle.options-toggle div span'
 	_title = 'h3.title'
 	_text = 'div.compText.aAbs p'
@@ -86,7 +83,6 @@ class Yahoo(Search):
 
 
 class Duckduckgo(Search): 
-	'''Searches duckduckgo'''
 	_url = 'a.result__snippet'
 	_title = 'h2.result__title a'
 	_text = 'a.result__snippet'
@@ -113,7 +109,6 @@ class Duckduckgo(Search):
 
 
 class Startpage(Search):
-	'''Searches startpage'''
 	_url = 'div h3 a'
 	_title = 'div h3 a span'
 	_text = 'p.desc.clk'
@@ -144,7 +139,6 @@ class Startpage(Search):
 
 
 class Ask(Search):
-	'''Searches ask.'''
 	_url = 'a.PartialSearchResults-item-title-link.result-link'
 	_title = 'a.PartialSearchResults-item-title-link.result-link'
 	_text = 'p.PartialSearchResults-item-abstract'
@@ -169,7 +163,6 @@ class Ask(Search):
 
 
 class Dogpile(Search):
-	'''Seaches dogpile.'''
 	_url = 'div.resultDisplayUrlPane a'
 	_title = 'div.resultTitlePane a'
 	_text = 'div.resultDescription'
@@ -196,7 +189,6 @@ class Dogpile(Search):
 
 
 class Searx(Search):
-	'''Uses searx.me search engine.'''
 	_url = 'h4.result_header a[href]'
 	_title = 'h4.result_header a'
 	_text = 'p.result-content'
