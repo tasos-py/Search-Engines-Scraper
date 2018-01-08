@@ -16,7 +16,7 @@ Torch
 Python 2.7 - 3.6, requests, bs4  
 
 ## Installation:  
-Copy `searchengines` to Python\Lib\site-packages\
+Copy searchengines to your python libraries
 Run `python -m pip install -r searchengines\requirements.txt`  
 
 ## Usage:  
