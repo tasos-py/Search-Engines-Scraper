@@ -20,11 +20,11 @@ timeout = 10
 ''' User-Agent string '''
 user_agent = 'Mozilla/5.0 (Windows NT 6.1; rv:51.0) Gecko/20100101 Firefox/51.0'
 
-''' Proxy addres '''
+''' Proxy address '''
 proxy = None
 
-''' TOR proxy addres ''' 
-tor = 'socks5h://127.0.0.1:9150'
+''' TOR proxy address ''' 
+tor = 'socks5h://127.0.0.1:9050'
 
 this_file = path.abspath(__file__)
 base_dir = path.abspath(path.join(path.dirname(this_file), pardir))
