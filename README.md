@@ -1,7 +1,7 @@
 # searchengines
 Search google, bing, yahoo, and other search engines with python.  
 
-## Search engines:  
+### Search engines:  
 Google  
 Bing  
 Yahoo  
@@ -33,5 +33,5 @@ results = google.results
 As a cli script:  
 
 ```  
-python cli.py -e google -q "your query" -r html,csv
+python search.py -e google -q "your query" -r html,csv
 ```
