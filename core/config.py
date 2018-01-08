@@ -28,10 +28,11 @@ tor = 'socks5h://127.0.0.1:9050'
 
 this_file = path.abspath(__file__)
 base_dir = path.abspath(path.join(path.dirname(this_file), pardir))
+files_dir = path.join(base_dir, 'files')
 
 ''' Path to html report file '''
-html_file = path.join(base_dir, 'files', 'search-report.html')
+html_file = path.join(files_dir, 'search-report.html')
 
 ''' Path to html report file '''
-csv_file = path.join(base_dir, 'files', 'search-report.csv')
+csv_file = path.join(files_dir, 'search-report.csv')
 
