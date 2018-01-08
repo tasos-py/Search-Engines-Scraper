@@ -22,13 +22,16 @@ Run `python -m pip install -r searchengines\requirements.txt`
 ## Usage:  
 As a library:  
 
+<code>
   import searchengines
   
   google = searchengines.Google()
   google.search("your query")
   results = google.results
+</code>
 
 As a cli script:  
 
+<code>
   python cli.py -e google -q "your query" -r html,csv
-
+<code>
