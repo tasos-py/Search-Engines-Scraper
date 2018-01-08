@@ -1,7 +1,7 @@
 # searchengines
 Search google, bing, yahoo, and other search engines with python.  
 
-### Search engines:  
+## Search engines:  
 Google  
 Bing  
 Yahoo  
