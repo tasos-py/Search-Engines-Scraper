@@ -20,7 +20,7 @@ class Http:
 		try: 
 			req = self.http.get(page, headers=headers, timeout=self.timeout)
 		except Exception as e: 
-			return {'http':0, 'html':str(e)}
+			return {'http':0, 'html':e.__doc__}
 		return {'http':req.status_code, 'html':req.text}
 	
 	def post(self, page, data, ref=None): 
@@ -29,18 +29,15 @@ class Http:
 		try : 
 			req = self.http.post(page, data=data, headers=headers, timeout=self.timeout)
 		except Exception as e: 
-			return {'http':0, 'html':str(e)}
+			return {'http':0, 'html':e.__doc__}
 		return {'http':req.status_code, 'html':req.text}
 	
 	def _set_proxy(self, proxy):
-		'''Sets HTTP, HTTPS proxy.'''
+		'''Returns HTTP, HTTPS, SOCKS proxies dictionary.'''
 		if proxy:
-			if proxy is True:
-				proxy = {'http':config.tor, 'https':config.tor}
-			elif '://' not in str(proxy) or len(str(proxy).split(':')) != 3: 
-				print('Invalid proxy format: {}'.format(proxy))
-			else: 
-				proxy = {'http':proxy, 'https':proxy}
+			if not _is_url(proxy): 
+				print('Warning: Invalid proxy format!')
+			proxy = {'http':proxy, 'https':proxy}
 		return proxy
 
 
@@ -50,22 +47,21 @@ def unquote(url):
 
 def _is_url(link): 
 	'''Checks if link is URL'''
-	parts = link.split('/')
-	return len(parts) > 2 and link.split('://')[0].lower() in ('http', 'https') and '.' in parts[2]
-	
+	parts = requests.utils.urlparse(link)
+	return bool(parts.scheme and parts.netloc)
+
 def _domain(url): 
 	'''Returns domain form URL'''
-	if _is_url(url): 
-		return url.split('/')[2].replace('www.', '') 
+	host = requests.utils.urlparse(url).netloc
+	return host.split(':')[0].replace('www', '')
 
 
 class Html: 
-	'''HTML template.'''
 	
 	html = u'''
 	<html>
-	<meta charset="UTF-8">
 	<head>
+	<meta charset="UTF-8">
 	<title>Search Report</title>
 	<style>
 	body {{ background-color:#f5f5f5; }} 
@@ -118,8 +114,9 @@ def _decode(s, errors='replace'):
 def _write(data, path):
 	'''
 	Creates report files.
-	:param data str or list
-	:param fname str
+	
+	:param data: str or list
+	:param fname: str
 	''' 
 	try: 
 		if config.python_version == 2 and type(data) is list:
@@ -135,4 +132,5 @@ def _write(data, path):
 		print('Report file: ' + path)
 	except Exception as e: 
 		print(e)
+
 
