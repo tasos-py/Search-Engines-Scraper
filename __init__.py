@@ -1,7 +1,7 @@
 from .core.engines import *
 
 __title__ = "searchengines"
-__version__ = '0.1'
+__version__ = '0.1.1'
 __author__ = 'Tasos M. Adamopoulos'
 
 __all__ = [
