@@ -84,7 +84,7 @@ class Html:
 	
 	table = u'''
 	<table>
-	<tr><th>{engine} search results: </th></tr>
+	<tr><th>{engine} search results </th></tr>
 	</table>
 	<table>
 	{rows}
