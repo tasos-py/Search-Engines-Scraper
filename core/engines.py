@@ -1,4 +1,4 @@
-from .engine import Search
+from .engine import *
 from . import config as cfg
 from .utilities import unquote, _write
 
@@ -15,7 +15,6 @@ class Google(Search):
 		self.engine = 'google' 
 		self.start_page = 'https://www.google.com'
 		self.delay = (2, 8)
-		self.max_pages = 20
 	
 	def _get_url(self, link, item='href'): 
 		'''Returns the URL of search results item.'''
@@ -30,7 +29,8 @@ class Google(Search):
 	def next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if exist)'''
 		next = self._get_tag_attr(tags.select_one(self._next), 'href')
-		return {'num':curr_page+1, 'url':(self.start_page+next if next else None), 'data':None}
+		url = (self.start_page + next) if next else None
+		return {'num':curr_page+1, 'url':url, 'data':None}
 
 
 class Bing(Search):
@@ -53,7 +53,8 @@ class Bing(Search):
 	def next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if exist)'''
 		next = self._get_tag_attr(tags.select_one(self._next), 'href')
-		return {'num':curr_page+1, 'url':(self.start_page+next if next else None), 'data':None}
+		url = (self.start_page + next) if next else None
+		return {'num':curr_page+1, 'url':url, 'data':None}
 
 
 class Yahoo(Search):
@@ -103,7 +104,7 @@ class Duckduckgo(Search):
 		'''Returns the next page number, URL, post data (if exist)'''
 		next = [i for i in tags.select(self._next[0]) if i.select(self._next[1])]
 		if next: 
-			data = {i.get('name'):i.get('value') for i in next[0].select('input[name]')}
+			data = {i['name']:i.get('value', '') for i in next[0].select('input[name]')}
 			return {'num':curr_page+1, 'url':self.start_page, 'data':data}
 		return {'num':curr_page+1, 'url':None, 'data':None}
 
@@ -133,7 +134,7 @@ class Startpage(Search):
 		'''Returns the next page number, URL, post data (if exist)'''
 		next = tags.find('form', {'name':'nextform', 'action':True})
 		if next: 
-			data = {i.get('name'):i.get('value') for i in next.select('input[name]')}
+			data = {i['name']:i.get('value', '') for i in next.select('input[name]')}
 			return {'num':curr_page+1, 'url':next.get('action'), 'data':data} 
 		return {'num':curr_page+1, 'url':None, 'data':None}
 
@@ -158,8 +159,8 @@ class Ask(Search):
 	def next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if exist)'''
 		next = tags.select(self._next)
-		next = self.start_page+next[-1].get('href') if next else None
-		return {'num':curr_page+1, 'url':next, 'data':None}
+		url = (self.start_page + next[-1]['href']) if next else None
+		return {'num':curr_page+1, 'url':url, 'data':None}
 
 
 class Dogpile(Search):
@@ -185,7 +186,8 @@ class Dogpile(Search):
 	def next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if exist)'''
 		next = self._get_tag_attr(tags.select_one(self._next), 'href')
-		return {'num':curr_page+1, 'url':(self.start_page+next if next else None), 'data':None} 
+		url = (self.start_page + next) if next else None
+		return {'num':curr_page+1, 'url':url, 'data':None} 
 
 
 class Searx(Search):
@@ -209,8 +211,8 @@ class Searx(Search):
 		'''Returns the next page number, URL, post data (if exist)'''
 		next = tags.select_one(self._next)
 		if next: 
-			data = {i.get('name'):i.get('value') for i in next.select('input[value]')}
-			return {'num':curr_page+1, 'url':self.start_page+next.get('action'), 'data':data}
+			data = {i['name']:i.get('value', '') for i in next.select('input[value]')}
+			return {'num':curr_page+1, 'url':self.start_page+next['action'], 'data':data}
 		return {'num':curr_page+1, 'url':None, 'data':None}
 
 
@@ -237,7 +239,8 @@ class Torch(Search):
 	def next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if exist)'''
 		next = [i['href'] for i in tags.select(self._next[0]) if i.text == self._next[1]]
-		return {'num':curr_page+1, 'url':(self.start_page+next[0] if next else None), 'data':None}
+		url = (self.start_page + next[0]) if next else None
+		return {'num':curr_page+1, 'url':url, 'data':None}
 
 
 search_engines = { 
@@ -253,29 +256,30 @@ search_engines = {
 	}
 
 
-class All(Search): 
+class All(object): 
 	'''Uses all search engines.'''
 	def __init__(self, proxy=cfg.proxy, timeout=cfg.timeout): 
 		self.engines = [se(proxy, timeout) for se in search_engines.values()]
+		self.results = Results()
 	
-	def search(self, query, max_results=100, unique=False, output=False): 
+	def search(self, query, max_links=cfg.max_links, max_pages=cfg.max_pages, unique=False): 
 		'''Searches all engines.'''
-		domains = [] 
 		for se in self.engines : 
-			se.domains += domains 
-			se.search(query, max_results, unique, output)
-			domains += se.domains 
+			se.search(query, max_links, max_pages, unique)
+			self.results.items += se.results.items
+		self.query = self.engines[0].query
+		return self.results
 	
 	def report(self, rep='print'): 
 		'''Prints the results, creates report files.'''
 		print() 
-		self._print(self.engines)
+		Search._print(self.engines)
 		if 'html' in rep.lower(): 
-			html = self._html(self.engines)
-			_write(html, cfg.html_file) 
+			path = cfg.files_dir + ''.join(i if i.isalnum() else '_' for i in self.query) + '.html'
+			_write(Search._html(self.engines), path) 
 		if 'csv' in rep.lower():
-			rows = self._csv(self.engines)
-			_write(rows, cfg.csv_file) 
+			path = cfg.files_dir + ''.join(i if i.isalnum() else '_' for i in self.query) + '.csv'
+			_write(Search._csv(self.engines), path) 
 
 
 class Multi(All): 
@@ -286,4 +290,6 @@ class Multi(All):
 			for e in search_engines.values() 
 			if e.__name__.lower() in engines
 		]
+		self.results = Results()
+
 
