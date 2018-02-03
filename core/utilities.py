@@ -53,7 +53,7 @@ def _is_url(link):
 def _domain(url): 
 	'''Returns domain form URL'''
 	host = requests.utils.urlparse(url).netloc
-	return host.split(':')[0].replace('www', '')
+	return host.lower().split(':')[0].replace('www.', '')
 
 
 class Html: 
