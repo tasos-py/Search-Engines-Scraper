@@ -18,7 +18,9 @@ Python 2.7 - 3.6, requests, bs4
 ## Installation  
 Copy searchengines to your python libraries.  
 Install requirements,  
-```python -m pip install -r searchengines\requirements.txt --upgrade```  
+```
+python -m pip install -r searchengines\requirements.txt --upgrade
+```  
 
 ## Usage  
 As a library:  
