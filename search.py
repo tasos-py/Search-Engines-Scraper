@@ -7,7 +7,7 @@ if __name__ == '__main__':
 	ap = argparse.ArgumentParser()	
 	ap.add_argument('-q', help='query', required=True)
 	ap.add_argument('-e', help='search engine - '+', '.join(search_engines.keys()), default='google')
-	ap.add_argument('-r', help='report [print, html, csv]', default='print')
+	ap.add_argument('-r', help='report [html, csv]', default='print')
 	ap.add_argument('-l', help='max links', default=config.max_links, type=int)
 	ap.add_argument('-p', help='max pages', default=config.max_pages, type=int)
 	ap.add_argument('-u', help='unique results', action='store_true')
