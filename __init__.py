@@ -2,7 +2,8 @@ from .core.engines import *
 
 __title__ = "searchengines"
 __version__ = '0.1'
-__author__ = 'Tasos M Adam'
+__author__ = 'Tasos M. Adamopoulos'
+
 __all__ = [
 	'Google', 
 	'Bing', 
