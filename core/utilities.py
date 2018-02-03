@@ -116,7 +116,7 @@ def _write(data, path):
 	Creates report files.
 	
 	:param data: str or list
-	:param fname: str
+	:param path: str
 	''' 
 	try: 
 		if config.python_version == 2 and type(data) is list:
