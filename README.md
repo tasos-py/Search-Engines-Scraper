@@ -23,11 +23,11 @@ Install requirements, `python -m pip install -r searchengines\requirements.txt`
 As a library:  
 
 ```
-import searchengines
+from searchengines import *
 
-google = searchengines.Google()
-google.search("your query")
-results = google.results
+engine = Google()
+results = engine.search("your query")
+links = results.links()
 ```
 
 As a cli script:  
