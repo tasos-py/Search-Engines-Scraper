@@ -76,11 +76,13 @@ class Search(object):
 			links = [self._items(l) for l in links]
 		return links
 	
-	def first_page(self): 
-		'''Inherited method'''
+	def _first_page(self): 
+		'''Returns the initial page and query.'''
+		pass
 	
-	def next_page(self, tags, curr_page): 
-		'''Inherited method'''
+	def _next_page(self, tags, curr_page): 
+		'''Returns the next page number, URL and post data'''
+		pass
 	
 	def search(self, query, max_links=cfg.max_links, max_pages=cfg.max_pages, unique=False): 
 		'''
@@ -92,7 +94,7 @@ class Search(object):
 		:returns Results
 		'''
 		self.query, self.filter = self._filter(query)
-		pages = [self.first_page()] 
+		pages = [self._first_page()] 
 		print('Searching', self.engine, 'for', self.query)
 		while len(self.results.items) < max_links and pages[-1]['num'] <= max_pages: 
 			ref = pages[-2]['url'] if len(pages) > 1 else None
@@ -114,7 +116,7 @@ class Search(object):
 						self.results.items += [item]
 						self._domains += [domain]
 					print('\rpage:{:<8} links:{}'.format(pages[-1]['num'], len(self.results.items)), end='')
-					pages += [self.next_page(tags, pages[-1]['num'])] 
+					pages += [self._next_page(tags, pages[-1]['num'])] 
 					if pages[-1]['url'] is None: 
 						break
 				else: 
@@ -140,7 +142,7 @@ class Search(object):
 		self._print([self])
 		if 'html' in rep.lower(): 
 			path = cfg.files_dir + ''.join(i if i.isalnum() else '_' for i in self.query) + '.html'
-			utl._write(self._html([self]), path) 
+			utl._write(self._html([self]), cfg.html_file) 
 		if 'csv' in rep.lower():
 			path = cfg.files_dir + ''.join(i if i.isalnum() else '_' for i in self.query) + '.csv'
 			utl._write(self._csv([self]), path) 
@@ -187,8 +189,8 @@ class Search(object):
 
 class Results:
 	'''Holds the search results'''
-	def __init__(self):
-		self.items = []
+	def __init__(self, items=None):
+		self.items = items or []
 	
 	def links(self):
 		'''Returns a list of results links'''
@@ -205,6 +207,10 @@ class Results:
 	def hosts(self):
 		'''Returns a list of results domains'''
 		return [row.get('host') for row in self.items]
+	
+	def all(self):
+		'''Returns all the items'''
+		return self.items
 	
 	def __str__(self):
 		return self.items.__str__()
