@@ -4,6 +4,7 @@ from .utilities import unquote, _write
 
 
 class Google(Search): 
+	'''Searches google'''
 	_url = 'a[href]'
 	_title = 'a'
 	_text = 'span.st'
@@ -19,21 +20,22 @@ class Google(Search):
 	def _get_url(self, link, item='href'): 
 		'''Returns the URL of search results item.'''
 		link = self._get_tag_attr(link.select_one(self._url), item)
-		return unquote(link.replace('/url?q=', '').split('&sa=U&')[0])
+		return unquote(link.replace('/url?q=', '').split('&sa=')[0])
 	
-	def first_page(self): 
+	def _first_page(self): 
 		'''Returns the initial page and query.'''
 		page = self.start_page + '/search?q=' + self.query + '&btnG=Search&gbv=1'
 		return {'num':1, 'url':page, 'data':None}
 	
-	def next_page(self, tags, curr_page): 
-		'''Returns the next page number, URL, post data (if exist)'''
+	def _next_page(self, tags, curr_page): 
+		'''Returns the next page number, URL, post data (if any)'''
 		next = self._get_tag_attr(tags.select_one(self._next), 'href')
 		url = (self.start_page + next) if next else None
 		return {'num':curr_page+1, 'url':url, 'data':None}
 
 
 class Bing(Search):
+	'''Searches bing'''
 	_url = 'a[href]'
 	_title = 'a'
 	_text = 'p'
@@ -45,19 +47,20 @@ class Bing(Search):
 		self.engine = 'bing'  
 		self.start_page = 'https://www.bing.com'
 	
-	def first_page(self): 
+	def _first_page(self): 
 		'''Returns the initial page and query.'''
 		page = self.start_page + '/search?q=' + self.query + '&go=Search&qs=ds&form=QBRE'
 		return {'num':1, 'url':page, 'data':None}
 	
-	def next_page(self, tags, curr_page): 
-		'''Returns the next page number, URL, post data (if exist)'''
+	def _next_page(self, tags, curr_page): 
+		'''Returns the next page number, URL, post data (if any)'''
 		next = self._get_tag_attr(tags.select_one(self._next), 'href')
 		url = (self.start_page + next) if next else None
 		return {'num':curr_page+1, 'url':url, 'data':None}
 
 
 class Yahoo(Search):
+	'''Searches yahoo'''
 	_url = 'div.compTitle.options-toggle div span'
 	_title = 'h3.title'
 	_text = 'div.compText.aAbs p'
@@ -72,18 +75,19 @@ class Yahoo(Search):
 	def _get_url(self, link, item='text'): 
 		return 'http://' + self._get_tag_attr(link.select_one(self._url), item)
 	
-	def first_page(self): 
+	def _first_page(self): 
 		'''Returns the initial page and query.'''
 		page = self.start_page + '/search?p=' + self.query + '&ei=UTF-8&nojs=1'
 		return {'num':1, 'url':page, 'data':None}
 	
-	def next_page(self, tags, curr_page): 
-		'''Returns the next page number, URL, post data (if exist)'''
+	def _next_page(self, tags, curr_page): 
+		'''Returns the next page number, URL, post data (if any)'''
 		next = self._get_tag_attr(tags.select_one(self._next), 'href')
 		return {'num':curr_page+1, 'url':next or None, 'data':None}
 
 
 class Duckduckgo(Search): 
+	'''Searches duckduckgo'''
 	_url = 'a.result__snippet'
 	_title = 'h2.result__title a'
 	_text = 'a.result__snippet'
@@ -95,13 +99,13 @@ class Duckduckgo(Search):
 		self.engine = 'duckduckgo' 
 		self.start_page = 'https://duckduckgo.com' + '/html/'
 	
-	def first_page(self): 
+	def _first_page(self): 
 		'''Returns the initial page and query.'''
 		data = {'q':self.query, 'b':'', 'kl':'us-en'} 
 		return {'num':1, 'url':self.start_page, 'data':data}
 	
-	def next_page(self, tags, curr_page): 
-		'''Returns the next page number, URL, post data (if exist)'''
+	def _next_page(self, tags, curr_page): 
+		'''Returns the next page number, URL, post data (if any)'''
 		next = [i for i in tags.select(self._next[0]) if i.select(self._next[1])]
 		if next: 
 			data = {i['name']:i.get('value', '') for i in next[0].select('input[name]')}
@@ -110,6 +114,7 @@ class Duckduckgo(Search):
 
 
 class Startpage(Search):
+	'''Searches startpage'''
 	_url = 'div h3 a'
 	_title = 'div h3 a span'
 	_text = 'p.desc.clk'
@@ -121,7 +126,7 @@ class Startpage(Search):
 		self.engine = 'startpage'  
 		self.start_page = 'https://www.startpage.com'
 	
-	def first_page(self): 
+	def _first_page(self): 
 		'''Returns the initial page and query.'''
 		page = self.start_page + '/do/asearch'
 		data = { 
@@ -130,8 +135,8 @@ class Startpage(Search):
 		}
 		return {'num':1, 'url':page, 'data':data}
 	
-	def next_page(self, tags, curr_page): 
-		'''Returns the next page number, URL, post data (if exist)'''
+	def _next_page(self, tags, curr_page): 
+		'''Returns the next page number, URL, post data (if any)'''
 		next = tags.find('form', {'name':'nextform', 'action':True})
 		if next: 
 			data = {i['name']:i.get('value', '') for i in next.select('input[name]')}
@@ -140,6 +145,7 @@ class Startpage(Search):
 
 
 class Ask(Search):
+	'''Searches ask.'''
 	_url = 'a.PartialSearchResults-item-title-link.result-link'
 	_title = 'a.PartialSearchResults-item-title-link.result-link'
 	_text = 'p.PartialSearchResults-item-abstract'
@@ -151,19 +157,20 @@ class Ask(Search):
 		self.engine = 'ask'  
 		self.start_page = 'https://uk.ask.com'
 	
-	def first_page(self): 
+	def _first_page(self): 
 		'''Returns the initial page and query.'''
 		page = self.start_page + '/web?q=' + self.query + '&qo=homepageSearchBox'
 		return {'num':1, 'url':page, 'data':None}
 	
-	def next_page(self, tags, curr_page): 
-		'''Returns the next page number, URL, post data (if exist)'''
+	def _next_page(self, tags, curr_page): 
+		'''Returns the next page number, URL, post data (if any)'''
 		next = tags.select(self._next)
 		url = (self.start_page + next[-1]['href']) if next else None
 		return {'num':curr_page+1, 'url':url, 'data':None}
 
 
 class Dogpile(Search):
+	'''Seaches dogpile.'''
 	_url = 'div.resultDisplayUrlPane a'
 	_title = 'div.resultTitlePane a'
 	_text = 'div.resultDescription'
@@ -178,19 +185,20 @@ class Dogpile(Search):
 	def _get_url(self, link, item='text'): 
 		return 'http://' + self._get_tag_attr(link.select_one(self._url), item)
 	
-	def first_page(self): 
+	def _first_page(self): 
 		'''Returns the initial page and query.'''
 		page = self.start_page + '/search/web?q=' + self.query 
 		return {'num':1, 'url':page, 'data':None}
 	
-	def next_page(self, tags, curr_page): 
-		'''Returns the next page number, URL, post data (if exist)'''
+	def _next_page(self, tags, curr_page): 
+		'''Returns the next page number, URL, post data (if any)'''
 		next = self._get_tag_attr(tags.select_one(self._next), 'href')
 		url = (self.start_page + next) if next else None
 		return {'num':curr_page+1, 'url':url, 'data':None} 
 
 
 class Searx(Search):
+	'''Uses searx.me search engine.'''
 	_url = 'h4.result_header a[href]'
 	_title = 'h4.result_header a'
 	_text = 'p.result-content'
@@ -202,13 +210,13 @@ class Searx(Search):
 		self.engine = 'searx'  
 		self.start_page = 'https://searx.me'
 	
-	def first_page(self): 
+	def _first_page(self): 
 		'''Returns the initial page and query.'''
 		data = {'q':self.query, 'category_general':'on', 'time_range':'', 'language':'all'}
 		return {'num':1, 'url':self.start_page+'/', 'data':data}
 	
-	def next_page(self, tags, curr_page): 
-		'''Returns the next page number, URL, post data (if exist)'''
+	def _next_page(self, tags, curr_page): 
+		'''Returns the next page number, URL, post data (if any)'''
 		next = tags.select_one(self._next)
 		if next: 
 			data = {i['name']:i.get('value', '') for i in next.select('input[value]')}
@@ -231,13 +239,13 @@ class Torch(Search):
 		if not proxy: 
 			print('Warning: Torch requires tor proxy!')
 	
-	def first_page(self): 
+	def _first_page(self): 
 		'''Returns the initial page and query.'''
 		page = self.start_page + '?q=' + self.query + '&cmd=Search!' 
 		return {'num':1, 'url':page, 'data':None}
 	
-	def next_page(self, tags, curr_page): 
-		'''Returns the next page number, URL, post data (if exist)'''
+	def _next_page(self, tags, curr_page): 
+		'''Returns the next page number, URL, post data (if any)'''
 		next = [i['href'] for i in tags.select(self._next[0]) if i.text == self._next[1]]
 		url = (self.start_page + next[0]) if next else None
 		return {'num':curr_page+1, 'url':url, 'data':None}
@@ -272,11 +280,11 @@ class All(object):
 	
 	def report(self, rep='print'): 
 		'''Prints the results, creates report files.'''
-		print() 
+		print(' ') 
 		Search._print(self.engines)
 		if 'html' in rep.lower(): 
 			path = cfg.files_dir + ''.join(i if i.isalnum() else '_' for i in self.query) + '.html'
-			_write(Search._html(self.engines), path) 
+			_write(Search._html(self.engines), cfg.html_file) 
 		if 'csv' in rep.lower():
 			path = cfg.files_dir + ''.join(i if i.isalnum() else '_' for i in self.query) + '.csv'
 			_write(Search._csv(self.engines), path) 
