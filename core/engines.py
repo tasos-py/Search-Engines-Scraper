@@ -252,15 +252,15 @@ class Torch(Search):
 
 
 search_engines = { 
-	'google':Google, 
-	'bing':Bing, 
-	'yahoo':Yahoo, 
-	'duckduckgo':Duckduckgo, 
-	'startpage':Startpage, 
-	'dogpile':Dogpile, 
-	'ask':Ask, 
-	'searx':Searx, 
-	'torch':Torch 
+	'google': Google, 
+	'bing': Bing, 
+	'yahoo': Yahoo, 
+	'duckduckgo': Duckduckgo, 
+	'startpage': Startpage, 
+	'dogpile': Dogpile, 
+	'ask': Ask, 
+	'searx': Searx, 
+	'torch': Torch 
 	}
 
 
