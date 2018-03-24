@@ -29,8 +29,8 @@ class Google(Search):
 	
 	def _next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if any)'''
-		next = self._get_tag_attr(tags.select_one(self._next), 'href')
-		url = (self.start_page + next) if next else None
+		nextp = self._get_tag_attr(tags.select_one(self._next), 'href')
+		url = (self.start_page + nextp) if nextp else None
 		return {'num':curr_page+1, 'url':url, 'data':None}
 
 
@@ -54,8 +54,8 @@ class Bing(Search):
 	
 	def _next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if any)'''
-		next = self._get_tag_attr(tags.select_one(self._next), 'href')
-		url = (self.start_page + next) if next else None
+		nextp = self._get_tag_attr(tags.select_one(self._next), 'href')
+		url = (self.start_page + nextp) if nextp else None
 		return {'num':curr_page+1, 'url':url, 'data':None}
 
 
@@ -82,8 +82,8 @@ class Yahoo(Search):
 	
 	def _next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if any)'''
-		next = self._get_tag_attr(tags.select_one(self._next), 'href')
-		return {'num':curr_page+1, 'url':next or None, 'data':None}
+		nextp = self._get_tag_attr(tags.select_one(self._next), 'href')
+		return {'num':curr_page+1, 'url':nextp or None, 'data':None}
 
 
 class Duckduckgo(Search): 
@@ -106,9 +106,9 @@ class Duckduckgo(Search):
 	
 	def _next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if any)'''
-		next = [i for i in tags.select(self._next[0]) if i.select(self._next[1])]
-		if next: 
-			data = {i['name']:i.get('value', '') for i in next[0].select('input[name]')}
+		nextp = [i for i in tags.select(self._next[0]) if i.select(self._next[1])]
+		if nextp: 
+			data = {i['name']:i.get('value', '') for i in nextp[0].select('input[name]')}
 			return {'num':curr_page+1, 'url':self.start_page, 'data':data}
 		return {'num':curr_page+1, 'url':None, 'data':None}
 
@@ -137,10 +137,10 @@ class Startpage(Search):
 	
 	def _next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if any)'''
-		next = tags.find('form', {'name':'nextform', 'action':True})
-		if next: 
-			data = {i['name']:i.get('value', '') for i in next.select('input[name]')}
-			return {'num':curr_page+1, 'url':next.get('action'), 'data':data} 
+		nextp = tags.find('form', {'name':'nextform', 'action':True})
+		if nextp: 
+			data = {i['name']:i.get('value', '') for i in nextp.select('input[name]')}
+			return {'num':curr_page+1, 'url':nextp.get('action'), 'data':data} 
 		return {'num':curr_page+1, 'url':None, 'data':None}
 
 
@@ -164,8 +164,8 @@ class Ask(Search):
 	
 	def _next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if any)'''
-		next = tags.select(self._next)
-		url = (self.start_page + next[-1]['href']) if next else None
+		nextp = tags.select(self._next)
+		url = (self.start_page + nextp[-1]['href']) if nextp else None
 		return {'num':curr_page+1, 'url':url, 'data':None}
 
 
@@ -192,8 +192,8 @@ class Dogpile(Search):
 	
 	def _next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if any)'''
-		next = self._get_tag_attr(tags.select_one(self._next), 'href')
-		url = (self.start_page + next) if next else None
+		nextp = self._get_tag_attr(tags.select_one(self._next), 'href')
+		url = (self.start_page + nextp) if nextp else None
 		return {'num':curr_page+1, 'url':url, 'data':None} 
 
 
@@ -217,10 +217,10 @@ class Searx(Search):
 	
 	def _next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if any)'''
-		next = tags.select_one(self._next)
-		if next: 
-			data = {i['name']:i.get('value', '') for i in next.select('input[value]')}
-			return {'num':curr_page+1, 'url':self.start_page+next['action'], 'data':data}
+		nextp = tags.select_one(self._next)
+		if nextp: 
+			data = {i['name']:i.get('value', '') for i in nextp.select('input[value]')}
+			return {'num':curr_page+1, 'url':self.start_page+nextp['action'], 'data':data}
 		return {'num':curr_page+1, 'url':None, 'data':None}
 
 
@@ -246,8 +246,8 @@ class Torch(Search):
 	
 	def _next_page(self, tags, curr_page): 
 		'''Returns the next page number, URL, post data (if any)'''
-		next = [i['href'] for i in tags.select(self._next[0]) if i.text == self._next[1]]
-		url = (self.start_page + next[0]) if next else None
+		nextp = [i['href'] for i in tags.select(self._next[0]) if i.text == self._next[1]]
+		url = (self.start_page + nextp[0]) if nextp else None
 		return {'num':curr_page+1, 'url':url, 'data':None}
 
 
