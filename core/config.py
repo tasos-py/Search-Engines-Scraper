@@ -32,7 +32,7 @@ files_dir = path.join(base_dir, 'files') + path.sep
 ## Path to html report file 
 html_file = path.join(files_dir, 'search-report.html')
 
-## Path to html report file 
+## Path to csv report file 
 csv_file = path.join(files_dir, 'search-report.csv')
 
 
