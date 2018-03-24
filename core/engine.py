@@ -208,7 +208,7 @@ class Results:
 		'''Returns a list of results domains'''
 		return [row.get('host') for row in self.items]
 	
-	def all(self):
+	def all_items(self):
 		'''Returns all the items'''
 		return self.items
 	
