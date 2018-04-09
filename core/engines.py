@@ -284,7 +284,7 @@ class All(object):
 		Search._print(self.engines)
 		if 'html' in rep.lower(): 
 			path = cfg.files_dir + ''.join(i if i.isalnum() else '_' for i in self.query) + '.html'
-			_write(Search._html(self.engines), cfg.html_file) 
+			_write(Search._html(self.engines), path) 
 		if 'csv' in rep.lower():
 			path = cfg.files_dir + ''.join(i if i.isalnum() else '_' for i in self.query) + '.csv'
 			_write(Search._csv(self.engines), path) 
