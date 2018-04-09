@@ -142,7 +142,7 @@ class Search(object):
 		self._print([self])
 		if 'html' in rep.lower(): 
 			path = cfg.files_dir + ''.join(i if i.isalnum() else '_' for i in self.query) + '.html'
-			utl._write(self._html([self]), cfg.html_file) 
+			utl._write(self._html([self]), path) 
 		if 'csv' in rep.lower():
 			path = cfg.files_dir + ''.join(i if i.isalnum() else '_' for i in self.query) + '.csv'
 			utl._write(self._csv([self]), path) 
