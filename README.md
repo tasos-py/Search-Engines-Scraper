@@ -43,5 +43,5 @@ print(links)
 As a cli script:  
 
 ```  
-python searchengines/search.py -e google -q "your query" -r html,csv
+python searchengines/search.py -e google,bing -q "my query" -r html,csv
 ```
