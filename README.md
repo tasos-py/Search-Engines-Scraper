@@ -1,5 +1,5 @@
 # searchengines
-A python library that performs queries to google, bing, yahoo, and other search engines. 
+A python library that performs queries to google, bing, yahoo, and other search engines.  
 When using Torch, `requests[socks]` is required, which can be installed using the requirements.txt file, as described below.
 
 ## Search engines  
@@ -14,10 +14,10 @@ Searx
 Torch  
 
 ## Features  
-Can use one, multiple, or all the search engines listed above.
-Proxy support. 
-Collects dark web links with Torch.
-Creates report files (html, csv).
+Can use one, multiple, or all the search engines listed above.  
+Proxy support.  
+Collects dark web links with Torch.  
+Creates report files (html, csv).  
 Easy to add new search engines. You can add a new engine by creating a new class in `searchengines/core/engines.py`, and register it on the `search_engines` dictionary in the same file. The class must be a child of `Search`, and must have those attributes: `_url`, `_title`, `_text`, `_links`, `_next`, and methods: `_first_page`, `_next_page`.
 
 ## Requirements  
