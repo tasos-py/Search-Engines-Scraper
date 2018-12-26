@@ -20,17 +20,17 @@ Torch
  - Can use one, multiple, or all the search engines listed above (as a CLI script).  
  - HTTP and SOCKS proxy support.  
  - Collects dark web links with Torch.  
- - Supports search operators - 'url:', 'title:', 'text:'.  
+ - Supports advanced search operators: 'url:', 'title:', 'text:'.  
  - Creates report files (html, csv).  
  - Easy to add new search engines. You can add a new engine by creating a new class in `search_engines/core/engines.py`, and register it on the `search_engines` dictionary in the same file. The new class should subclass `Search`, and it should override those methods: `_selectors`, `_first_page`, `_next_page`.  
  - Python2 - Python3 compatible.  
 
 ## Requirements  
-Python 2.7 - 3.7, with requests and bs4  
+Python 2.7 - 3.7, with [requests](http://docs.python-requests.org/en/master/) and [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)  
 
 ## Installation  
 Copy searchengines to your python libraries.  
-Install requirements,  `python -m pip install -r search_engines/requirements.txt --upgrade`.  
+Install requirements:  `python -m pip install -r search_engines/requirements.txt --upgrade`.  
 Done!  
 
 ## Usage  
