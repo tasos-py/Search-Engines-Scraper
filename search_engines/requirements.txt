@@ -1,0 +1,2 @@
+requests[socks]
+bs4
