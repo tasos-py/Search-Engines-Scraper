@@ -19,12 +19,12 @@ Torch
 
 ## Features  
 
- - Can use one, multiple, or all the search engines listed above (as a CLI script).  
  - HTTP and SOCKS proxy support.  
  - Collects dark web links with Torch.  
- - Supports advanced search operators: 'url:', 'title:', 'text:'.  
- - Creates report files (html, csv).  
- - Easy to add new search engines. You can add a new engine by creating a new class in `search_engines/core/engines.py`, and register it on the `search_engines` dictionary in the same file. The new class should subclass `Search`, and it should override those methods: `_selectors`, `_first_page`, `_next_page`.  
+ - Supports advanced search operators: `url:query`, `title:query`, `text:query`.  
+ - Creates report files (html, csv). 
+ - Can use one, multiple, or all the search engines listed above (as a CLI script).  
+ - Easy to add new search engines. You can add a new engine by creating a new class in `search_engines/core/engines.py`, and register it on the `search_engines` dictionary in the same file. The new class should subclass `Search`, and it should override the following methods: `_selectors`, `_first_page`, `_next_page`.  
  - Python2 - Python3 compatible.  
 
 ## Requirements  
