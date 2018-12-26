@@ -4,7 +4,8 @@ A python library that performs queries to google, bing, yahoo, and other search 
 When using Torch, `requests[socks]` is required, which can be installed using the requirements.txt file, as described below.  
 Note that web-scraping may be against the TOS of some search-engins, and may result in a temporary ban.
 
-## Search engines  
+## Supported search engines  
+
 Google  
 Bing  
 Yahoo  
@@ -17,6 +18,7 @@ Unbubble
 Torch  
 
 ## Features  
+
  - Can use one, multiple, or all the search engines listed above (as a CLI script).  
  - HTTP and SOCKS proxy support.  
  - Collects dark web links with Torch.  
@@ -26,9 +28,11 @@ Torch
  - Python2 - Python3 compatible.  
 
 ## Requirements  
+
 Python 2.7 - 3.7, with [requests](http://docs.python-requests.org/en/master/) and [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)  
 
 ## Installation  
+
 Copy searchengines to your python libraries.  
 Install requirements:  `python -m pip install -r search_engines/requirements.txt --upgrade`.  
 Done!  
