@@ -2,7 +2,7 @@
 
 A python library that performs queries to google, bing, yahoo, and other search engines and collects the search results.  
 When using Torch, `requests[socks]` is required, which can be installed using the requirements.txt file, as described below.  
-Note that web-scraping may be against the TOS of some search-engins, and may result in a temporary ban.
+Note that web-scraping may be against the TOS of some search engines, and may result in a temporary ban.
 
 ## Supported search engines  
 
@@ -23,8 +23,8 @@ Torch
  - Collects dark web links with Torch.  
  - Supports advanced search operators: `url:query`, `title:query`, `text:query`.  
  - Creates report files (html, csv). 
- - Can use one, multiple, or all the search engines listed above (as a CLI script).  
- - Easy to add new search engines. You can add a new engine by creating a new class in `search_engines/core/engines.py`, and register it on the `search_engines` dictionary in the same file. The new class should subclass `Search`, and it should override the following methods: `_selectors`, `_first_page`, `_next_page`.  
+ - Can use one, multiple, or all the search engines listed above as a CLI script.  
+ - Easy to add new search engines. You can add a new engine by creating a new class in `search_engines/core/engines.py`, and register it on the `search_engines` dictionary in the same file. The new class should subclass `Search`, and override the following methods: `_selectors`, `_first_page`, `_next_page`.  
  - Python2 - Python3 compatible.  
 
 ## Requirements  
