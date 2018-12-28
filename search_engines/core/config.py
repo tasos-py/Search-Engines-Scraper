@@ -6,7 +6,7 @@ from sys import version_info
 python_version = version_info.major
 
 ## Maximum number or pages 
-max_pages = 20
+max_pages = 10
 
 ## Domains in this list will not be collected 
 blacklist = []
