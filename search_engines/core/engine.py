@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from time import sleep
 from random import uniform as random_uniform
 from . import utilities as utl
-from . import config as cfg
+import config as cfg
 
 
 class Search(object):
@@ -12,16 +12,42 @@ class Search(object):
         self._http = utl.Http(timeout, proxy) 
         self._delay = (1, 4)
         self._domains = []
+        self._query = ''
 
-        self.query = ''
         self.results = Results()
+        '''The search results.'''
         self.blacklist = cfg.blacklist
+        '''Domains in this list are ignored.'''
+        self.unique_domains = False
+        '''Does not collect douplicate domains.'''
     
-    def _get_tag_item(self, tag, item):
-        '''Returns Tag attributes.'''
-        if tag:
-            return tag.text if item == 'text' else tag.get(item, '')
-        return ''
+    def _selectors(self, element):
+        '''Returns the appropriate CSS selector.'''
+        raise NotImplementedError()
+    
+    def _first_page(self):
+        '''Returns the initial page and query.'''
+        raise NotImplementedError()
+    
+    def _next_page(self, tags):
+        '''Returns the next page URL and post data.'''
+        raise NotImplementedError()
+    
+    def _get_url(self, tag, item='href'):
+        '''Returns the URL of search results items.'''
+        selector = self._selectors('url')
+        url = self._get_tag_item(tag.select_one(selector), item)
+        return utl.unquote_url(url)
+    
+    def _get_title(self, tag, item='text'):
+        '''Returns the title of search results items.'''
+        selector = self._selectors('title')
+        return self._get_tag_item(tag.select_one(selector), item)
+    
+    def _get_text(self, tag, item='text'):
+        '''Returns the text of search results items.'''
+        selector = self._selectors('text')
+        return self._get_tag_item(tag.select_one(selector), item)
     
     def _get_page(self, page, data=None, ref=None):
         '''Gets pagination links.'''
@@ -29,20 +55,7 @@ class Search(object):
             return self._http.post(page, data, ref)
         return self._http.get(page, ref)
     
-    def _get_url(self, tag, item='href'):
-        '''Returns the URL of search results items.'''
-        url = self._get_tag_item(tag.select_one(self._selectors('url')), item)
-        return utl.unquote_url(url)
-    
-    def _get_title(self, tag, item='text'):
-        '''Returns the title of search results items.'''
-        return self._get_tag_item(tag.select_one(self._selectors('title')), item)
-    
-    def _get_text(self, tag, item='text'):
-        '''Returns the text of search results items.'''
-        return self._get_tag_item(tag.select_one(self._selectors('text')), item)
-    
-    def _filter(self, query):
+    def _filter_query(self, query):
         '''Splits query to filter, query.'''
         filters = (
             u'inurl', u'intitle', u'intext', u'inhost', 
@@ -54,6 +67,12 @@ class Search(object):
         else:
             _filter = u''
         return (query, _filter.strip().lower())
+    
+    def _get_tag_item(self, tag, item):
+        '''Returns Tag attributes.'''
+        if tag:
+            return tag.text if item == 'text' else tag.get(item, u'')
+        return u''
     
     def _items(self, link):
         '''Returns a dictionary of the link items.'''
@@ -67,34 +86,25 @@ class Search(object):
     
     def _query_in(self, item):
         '''Checks if query is contained in the item.'''
-        return self.query.lower() in item.lower()
+        return self._query.lower() in item.lower()
     
-    def _extract(self, tags):
+    def _collect_results(self, tags):
         '''Collects links from search results page.''' 
-        links = tags.select(self._selectors('links'))
-        if 'url' in self.filter:
-            links = [self._items(l) for l in links if self._query_in(self._get_url(l))]
-        elif 'title' in self.filter:
-            links = [self._items(l) for l in links if self._query_in(self._get_title(l))]
-        elif 'text' in self.filter:
-            links = [self._items(l) for l in links if self._query_in(self._get_text(l))]
-        elif 'host' in self.filter:
-            links = [self._items(l) for l in links if self._query_in(utl.domain(self._get_url(l)))]
-        else:
-            links = [self._items(l) for l in links]
+        tags = tags.select(self._selectors('links'))
+        links = [self._items(l) for l in tags]
+        if 'url' in self._filter:
+            links = [l for l in links if self._query_in(l['link'])]
+        elif 'title' in self._filter:
+            links = [l for l in links if self._query_in(l['title'])]
+        elif 'text' in self._filter:
+            links = [l for l in links if self._query_in(l['text'])]
+        elif 'host' in self._filter:
+            links = [l for l in links if self._query_in(utl.domain(l['link']))]
         return links
-    
-    def _selectors(self, element):
-        '''Returns the appropriate CSS selector.'''
-        raise NotImplementedError()
-    
-    def _first_page(self):
-        '''Returns the initial page and query.'''
-        raise NotImplementedError()
-    
-    def _next_page(self, tags, this_page):
-        '''Returns the next page number, URL and post data'''
-        raise NotImplementedError()
+
+    def set_user_agent(self, ua_string):
+        '''Sets the User-Agent string.'''
+        self._http.client.headers['User-Agent'] = ua_string
     
     def search(self, query, pages=cfg.max_pages, unique=False): 
         '''
@@ -105,17 +115,17 @@ class Search(object):
         :param unique: bool Optional, collects unique domains only
         :returns Results
         '''
-        self.query, self.filter = self._filter(query)
+        self._query, self._filter = self._filter_query(query)
         _pages = [self._first_page()]
         utl.console('\rSearching {}'.format(self._name))
 
-        while _pages[-1]['num'] <= pages:
+        while len(_pages) <= pages and _pages[-1]['url'] is not None:
             ref = _pages[-2]['url'] if len(_pages) > 1 else None
             try:
                 request = self._get_page(_pages[-1]['url'], _pages[-1]['data'], ref)
                 if request['http'] == 200:
                     tags = BeautifulSoup(request['html'], "html.parser")
-                    items = self._extract(tags)
+                    items = self._collect_results(tags)
 
                     for item in items:
                         domain, url = item['host'], item['link']
@@ -127,38 +137,35 @@ class Search(object):
                             continue
                         self.results._results += [item]
                         self._domains += [domain]
-                    utl.console('\rpage: {:<8} links: {}'.format(len(_pages), len(self.results)), end='')
                     
-                    next_page = self._next_page(tags, _pages[-1]['num'])
-                    if next_page['url'] is None:
-                        break
-                    _pages += [next_page]
+                    msg = '\rpage: {:<8} links: {}'.format(len(_pages), len(self.results))
+                    utl.console(msg, end='')
+                    _pages += [self._next_page(tags)]
                 else:
-                    error = ('HTTP ' + str(request['http'])) if request['http'] else request['html']
-                    utl.console(u'\rError: {:<20}'.format(error))
+                    msg = ('HTTP ' + str(request['http'])) if request['http'] else request['html']
+                    utl.console(u'\rError: {:<20}'.format(msg))
                     break
                 sleep(random_uniform(*self._delay))
             except KeyboardInterrupt:
                 break
-        utl.console('\r\t\t\t\t\r', end='') 
+        utl.console('\r\t\t\t\t\r', end='')
         return self.results
     
-    def report(self, output=''):
+    def report(self, output=None):
         '''
         Prints search results and creates report files.
         
         :param output: str Optional, the report format (html, csv).
         '''
         utl.console(' ')
-        utl.results_print([self])
-        file_name = ''.join(i if i.isalnum() else '_' for i in self.query)
+        utl.print_results([self])
+        file_name = u'_'.join(self._query.split())
+        path = cfg.report_files_dir + file_name
 
-        if 'html' in output.lower():
-            path = cfg.report_files_dir + file_name
-            utl.write_file(utl.results_html([self]), path + '.html') 
-        if 'csv' in output.lower():
-            path = cfg.report_files_dir + file_name
-            utl.write_file(utl.results_csv([self]), path + '.csv') 
+        if 'html' in str(output).lower():
+            utl.write_file(utl.html_results([self]), path + u'.html') 
+        if 'csv' in str(output).lower():
+            utl.write_file(utl.csv_results([self]), path + u'.csv') 
 
 
 class Results:
