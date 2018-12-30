@@ -1,26 +1,26 @@
 from __future__ import print_function
-
 import requests
 import csv
 import io
-from sys import stdout, getfilesystemencoding
-from . import config
+from collections import namedtuple
+from lib import windows_cmd_encoding
+import config
 
 
 class Http:
     '''Performs HTTP requests.'''
     def __init__(self, timeout=config.timeout, proxy=config.proxy):
-        self.http = requests.session()
+        self.client = requests.session()
         self.timeout = timeout
-        self.http.proxies = self._set_proxy(proxy)
-        self.http.headers['User-Agent'] = config.user_agent
+        self.client.proxies = self._set_proxy(proxy)
+        self.client.headers['User-Agent'] = config.user_agent
 
     def get(self, page, ref=None):
         '''GET request.'''
+        headers = {'Referer': self._quote(ref or page)}
         try:
-            req = self.http.get(
-                quote_url(page), headers = {'Referer': quote_url(ref or page)}, 
-                timeout = self.timeout
+            req = self.client.get(
+                self._quote(page), headers = headers, timeout = self.timeout
             )
         except requests.exceptions.RequestException as e:
             return {'http':0, 'html':e.__doc__}
@@ -28,24 +28,26 @@ class Http:
     
     def post(self, page, data, ref=None):
         '''POST request.'''
+        headers = {'Referer': self._quote(ref or page)}
         try:
-            req = self.http.post(
-                quote_url(page), data, headers = {'Referer': quote_url(ref or page)}, 
-                timeout = self.timeout
+            req = self.client.post(
+                quote_url(page), data, headers = headers, timeout = self.timeout
             )
         except requests.exceptions.RequestException as e:
             return {'http':0, 'html':e.__doc__}
         return {'http':req.status_code, 'html':req.text}
     
-    def set_user_agent(self, ua_string):
-        '''Sets the User-Agent string.'''
-        self.http.headers['User-Agent'] = ua_string
+    def _quote(self, url):
+        '''URL-encodes URLs.'''
+        if decode_bytes(unquote_url(url)) == decode_bytes(url):
+            url = quote_url(url)
+        return url
     
     def _set_proxy(self, proxy):
         '''Returns HTTP, HTTPS, SOCKS proxies dictionary.'''
         if proxy:
             if not is_url(proxy):
-                print('Warning: Invalid proxy format!')
+                console(u'Invalid proxy format!', level=Level.warning)
             proxy = {'http':proxy, 'https':proxy}
         return proxy
 
@@ -124,41 +126,38 @@ class Html:
     data = u'''<tr><td></td><td>{}</td></tr>'''
 
 
-def results_print(engines):
+def print_results(engines):
     '''Prints the results.'''
     for engine in engines:
-        console(engine._name + ' results') 
-        for i,v in enumerate(engine.results, 1):
-            v = v['link']
-            if config.python_version == 2:
-                v = encode_str(v) 
-            console('{:<3}{}'.format(i, v)) 
-        console(' ')
+        console(engine._name + u' results') 
+        for i, v in enumerate(engine.results, 1):
+            console(u'{:<3}{}'.format(i, v['link'])) 
+        console(u' ')
 
-def results_html(engines):
+def html_results(engines):
     '''Creates html report.'''
-    query = decode_bytes(engines[0].query) if engines else ''
+    query = decode_bytes(engines[0]._query) if engines else ''
     tables = u''
     for engine in engines:
         rows = u''
         for i, v in enumerate(engine.results, 1):
             data = u''
-            if 'title' in engine.filter:
+            if 'title' in engine._filter:
                 data += Html.data.format(v['title'])
-            elif 'text' in engine.filter:
+            elif 'text' in engine._filter:
                 data += Html.data.format(v['text'])
             rows += Html.row.format(number=i, link=v['link'], data=data)
         tables += Html.table.format(engine=engine._name, rows=rows) 
     return Html.html.format(query=query, table=tables)
 
-def results_csv(engines):
+def csv_results(engines):
     '''Creates csv report.'''
     encoder = decode_bytes if config.python_version == 3 else encode_str
     data = [['Query', 'Engine', 'Domain', 'URL', 'Title', 'Text']]
     for engine in engines:
         for i in engine.results:
             row = [
-                engine.query, engine._name, 
+                engine._query, engine._name, 
                 i['host'], i['link'], i['title'], i['text']
             ]
             row = [encoder(i) for i in row]
@@ -180,19 +179,16 @@ def write_file(data, path, encoding='utf-8'):
         f.close()
         console(u'Report file: ' + path)
     except IOError as e:
-        print(e)
+        console(e, level=Level.error)
 
-def console(msg, end=u'\r\n'):
+def console(msg, end=u'\r\n', level=None):
     '''Prints data on the console.'''
-    msg = decode_bytes(msg)
-    if config.python_version == 2 and config.os_name == 'nt':
-        msg = decode_bytes(encode_str(msg, 'ascii'))
-    print(msg, end=end)
+    print(u'{}{}'.format(level or u'', msg), end=end)
 
-def decode_argv(arg):
-    '''Decodes command line arguments.'''
-    encoding = getfilesystemencoding()
-    return decode_bytes(arg, encoding)
-
+Level = namedtuple('Level', ['info', 'warning', 'error'])(
+    info = u'Info: ',
+    warning = u'Warning: ',
+    error = u'Error: '
+)
 
 
