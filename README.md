@@ -23,7 +23,7 @@ Torch
  - Collects dark web links with Torch.  
  - Supports advanced search operators: `url:query`, `title:query`, `text:query`.  
  - Creates report files (html, csv). 
- - Easy to add new search engines. You can add a new engine by creating a new class in `search_engines/core/engines.py`, and register it on the `search_engines` dictionary in the same file. The new class should subclass `Search`, and override the following methods: `_selectors`, `_first_page`, `_next_page`.  
+ - Easy to add new search engines. You can add a new engine by creating a new class in `search_engines/core/engines.py`, and register it on the `search_engines` dictionary in the same file. The new class should subclass `Search`, and override the following methods: `_selectors`, `_first_page`, `_next_page` and attributes: `_name`, `_base_url`.  
  - Python2 - Python3 compatible.  
 
 ## Requirements  
@@ -32,7 +32,7 @@ Python 2.7 - 3.7, with [requests](http://docs.python-requests.org/en/master/) an
 
 ## Installation  
 
-Copy searchengines to your python libraries.  
+Copy `search_engines` to your python libraries.  
 Install requirements:  `python -m pip install -r search_engines/requirements.txt --upgrade`.  
 Done!  
 
