@@ -1,26 +1,27 @@
 from bs4 import BeautifulSoup
 from time import sleep
 from random import uniform as random_uniform
+
 from . import utilities as utl
-import config as cfg
+from .. import config as cfg
 
 
 class Search(object):
-    '''The base class.'''
+    '''The base class for all Search Engines.'''
     def __init__(self, proxy=cfg.proxy, timeout=cfg.timeout):
         self._name = None
         self._http = utl.Http(timeout, proxy) 
         self._delay = (1, 4)
-        self._domains = []
         self._query = ''
+        self._filter = ''
 
         self.results = Results()
         '''The search results.'''
-        self.blacklist = cfg.blacklist
-        '''Domains in this list are ignored.'''
+        self.unique_urls = False
+        '''Collects only unique URLs.'''
         self.unique_domains = False
-        '''Does not collect douplicate domains.'''
-    
+        '''Collects only unique domains.'''
+
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
         raise NotImplementedError()
@@ -55,19 +56,6 @@ class Search(object):
             return self._http.post(page, data, ref)
         return self._http.get(page, ref)
     
-    def _filter_query(self, query):
-        '''Splits query to filter, query.'''
-        filters = (
-            u'inurl', u'intitle', u'intext', u'inhost', 
-            u'url', u'title', u'text', u'host'
-        )
-        query = utl.decode_bytes(query)
-        if query.split(u':')[0].lower() in filters:
-            _filter, query = query.split(u':', 1) 
-        else:
-            _filter = u''
-        return (query, _filter.strip().lower())
-    
     def _get_tag_item(self, tag, item):
         '''Returns Tag attributes.'''
         if tag:
@@ -88,8 +76,8 @@ class Search(object):
         '''Checks if query is contained in the item.'''
         return self._query.lower() in item.lower()
     
-    def _collect_results(self, tags):
-        '''Collects links from search results page.''' 
+    def _filter_results(self, tags):
+        '''Processes and filters the search results.''' 
         tags = tags.select(self._selectors('links'))
         links = [self._items(l) for l in tags]
         if 'url' in self._filter:
@@ -101,71 +89,97 @@ class Search(object):
         elif 'host' in self._filter:
             links = [l for l in links if self._query_in(utl.domain(l['link']))]
         return links
+    
+    def _collect_results(self, items):
+        '''Colects the search results items.''' 
+        for item in items:
+            if not utl.is_url(item['link']):
+                continue
+            if item in self.results._results:
+                continue
+            if self.unique_domains and item['link'] in self.results.links():
+                continue
+            if self.unique_domains and item['host'] in self.results.hosts():
+                continue
+            self.results._results += [item]
 
     def set_user_agent(self, ua_string):
         '''Sets the User-Agent string.'''
         self._http.client.headers['User-Agent'] = ua_string
-    
-    def search(self, query, pages=cfg.max_pages, unique=False): 
+
+    def set_search_operator(self, operator):
         '''
-        Queries the search engine, goes through all pages and collects the results.
+        Filters search results based on the operator. 
+        Supported operators: 'url', 'title', 'text', 'host'
+
+        :param operator: str The search operator
+        '''
+        operator = utl.decode_bytes(operator or '')
+        operators = [u'url', u'title', u'text', u'host']
+
+        if operator not in operators:
+            msg = u'Ignoring unsupported operator: "{}"!'.format(operator)
+            utl.console(msg, level=utl.Level.warning)
+        else:
+            self._filter = operator
+    
+    def search(self, query, pages=cfg.search_pages): 
+        '''
+        Queries the search engine, goes through the pages and collects the results.
         
         :param query: str The search query
-        :param pages: int Optional, the number of search results pages
-        :param unique: bool Optional, collects unique domains only
-        :returns Results
+        :param pages: int Optional, the number of pages to search
+        :returns Results object
         '''
-        self._query, self._filter = self._filter_query(query)
-        _pages = [self._first_page()]
         utl.console('\rSearching {}'.format(self._name))
+        self._query = utl.decode_bytes(query)
+        ref, (url, data) = None, self._first_page()
 
-        while len(_pages) <= pages and _pages[-1]['url'] is not None:
-            ref = _pages[-2]['url'] if len(_pages) > 1 else None
+        for page in range(1, pages + 1):
             try:
-                request = self._get_page(_pages[-1]['url'], _pages[-1]['data'], ref)
-                if request['http'] == 200:
-                    tags = BeautifulSoup(request['html'], "html.parser")
-                    items = self._collect_results(tags)
-
-                    for item in items:
-                        domain, url = item['host'], item['link']
-                        if not utl.is_url(url):
-                            continue
-                        if (unique and domain in self._domains) or domain in self.blacklist: 
-                            continue 
-                        if item in self.results.results():
-                            continue
-                        self.results._results += [item]
-                        self._domains += [domain]
-                    
-                    msg = '\rpage: {:<8} links: {}'.format(len(_pages), len(self.results))
-                    utl.console(msg, end='')
-                    _pages += [self._next_page(tags)]
-                else:
-                    msg = ('HTTP ' + str(request['http'])) if request['http'] else request['html']
+                resp = self._get_page(url, data, ref)
+                if resp.http != 200:
+                    msg = ('HTTP ' + str(resp.http)) if resp.http else resp.html
                     utl.console(u'\rError: {:<20}'.format(msg))
+                    break
+                tags = BeautifulSoup(resp.html, "html.parser")
+                items = self._filter_results(tags)
+                self._collect_results(items)
+                
+                msg = '\rpage: {:<8} links: {}'.format(page, len(self.results))
+                utl.console(msg, end='')
+                ref, (url, data) = url, self._next_page(tags)
+                if not url:
                     break
                 sleep(random_uniform(*self._delay))
             except KeyboardInterrupt:
                 break
-        utl.console('\r\t\t\t\t\r', end='')
+        utl.console('\r\t\t\t\t\t\t\r', end='')
         return self.results
     
-    def report(self, output=None):
+    def report(self, output=None, path=None):
         '''
-        Prints search results and creates report files.
+        Prints search results and/or creates report files.
+        supported output format: html, csv, json.
         
-        :param output: str Optional, the report format (html, csv).
+        :param output: str Optional, the report format.
+        :param path: str Optional, the file to save the report.
         '''
         utl.console(' ')
         utl.print_results([self])
-        file_name = u'_'.join(self._query.split())
-        path = cfg.report_files_dir + file_name
+        
+        if not self.results._results:
+            return
+        if not path:
+            path = u'_'.join(self._query.split())
+            path = cfg.os_path.join(cfg.report_files_dir, path)
 
-        if 'html' in str(output).lower():
+        if 'html' in (output or '').lower():
             utl.write_file(utl.html_results([self]), path + u'.html') 
-        if 'csv' in str(output).lower():
+        if 'csv' in (output or '').lower():
             utl.write_file(utl.csv_results([self]), path + u'.csv') 
+        if 'json' in (output or '').lower():
+            utl.write_file(utl.json_results([self]), path + u'.json') 
 
 
 class Results:
@@ -174,23 +188,23 @@ class Results:
         self._results = items or []
     
     def links(self):
-        '''Returns a list of results links'''
+        '''Returns the links found in search results'''
         return [row.get('link') for row in self._results]
     
     def titles(self):
-        '''Returns a list of results titles'''
+        '''Returns the titles found in search results'''
         return [row.get('title') for row in self._results]
     
     def text(self):
-        '''Returns a list of results text'''
+        '''Returns the text found in search results'''
         return [row.get('text') for row in self._results]
     
     def hosts(self):
-        '''Returns a list of results domains'''
+        '''Returns the domains found in search results'''
         return [row.get('host') for row in self._results]
     
     def results(self):
-        '''Returns all search results'''
+        '''Returns all data found in search results'''
         return self._results
     
     def __getitem__(self, index):
@@ -201,6 +215,4 @@ class Results:
 
     def __str__(self):
         return 'Results <{} items>'.format(len(self._results))
-
-
 
