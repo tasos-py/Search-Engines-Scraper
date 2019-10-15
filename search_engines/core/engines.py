@@ -1,6 +1,6 @@
-from .engine import Search, Results
+from .engine import Search, Results, BeautifulSoup
 from . import utilities as utl
-import config as cfg
+from .. import config as cfg
 
 
 class Google(Search):
@@ -17,22 +17,22 @@ class Google(Search):
             'url': 'a[href]', 
             'title': 'a', 
             'text': 'span.st', 
-            'links': 'div#search div#ires div.g', 
-            'next': 'table#nav td[style="text-align:left"] a[href]'
+            'links': 'div#search div.g', 
+            'next': 'table#nav td.b.navend a#pnnext'
         }
         return selectors[element]
     
     def _first_page(self):
         '''Returns the initial page and query.'''
-        page = u'{}/search?q={}&gbv=1'.format(self._base_url, self._query)
-        return {'url':page, 'data':None}
+        url = u'{}/search?q={}'.format(self._base_url, self._query)
+        return (url, None)
     
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
         selector = self._selectors('next')
         next_page = self._get_tag_item(tags.select_one(selector), 'href')
         url = (self._base_url + next_page) if next_page else None
-        return {'url':url, 'data':None}
+        return (url, None)
 
     def _get_url(self, tag, item='href'):
         '''Returns the URL of search results item.'''
@@ -62,15 +62,15 @@ class Bing(Search):
     
     def _first_page(self):
         '''Returns the initial page and query.'''
-        page = u'{}/search?q={}'.format(self._base_url, self._query)
-        return {'url':page, 'data':None}
+        url = u'{}/search?q={}'.format(self._base_url, self._query)
+        return (url, None)
     
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
         selector = self._selectors('next')
         next_page = self._get_tag_item(tags.select_one(selector), 'href')
         url = (self._base_url + next_page) if next_page else None
-        return {'url':url, 'data':None}
+        return (url, None)
 
 
 class Yahoo(Search):
@@ -93,14 +93,14 @@ class Yahoo(Search):
     
     def _first_page(self):
         '''Returns the initial page and query.'''
-        page = u'{}/search?p={}&ei=UTF-8&nojs=1'.format(self._base_url, self._query)
-        return {'url':page, 'data':None}
+        url = u'{}/search?p={}&ei=UTF-8&nojs=1'.format(self._base_url, self._query)
+        return (url, None)
     
     def _next_page(self, tags): 
         '''Returns the next page URL and post data (if any)'''
         selector = self._selectors('next')
         next_page = self._get_tag_item(tags.select_one(selector), 'href')
-        return {'url':next_page or None, 'data':None}
+        return (next_page or None, None)
 
     def _get_url(self, link, item='href'):
         selector = self._selectors('url')
@@ -129,7 +129,7 @@ class Duckduckgo(Search):
     def _first_page(self):
         '''Returns the initial page and query.'''
         data = {'q':self._query, 'b':'', 'kl':'us-en'} 
-        return {'url':self._base_url, 'data':data}
+        return self._base_url, data
     
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
@@ -138,27 +138,24 @@ class Duckduckgo(Search):
         if inputs:
             data = {i['name']:i.get('value', '') for i in inputs}
             url = self._base_url
-        return {'url':url, 'data':data}
+        return url, data
 
 
 class Startpage(Search):
     '''Searches startpage.com'''
     def __init__(self, proxy=cfg.proxy, timeout=cfg.timeout): 
         super(Startpage, self).__init__(proxy, timeout)
-        self._base_url = 'https://www.startpage.com/do/asearch'
+        self._base_url = 'https://www.startpage.com'
         self._name = 'Startpage'
     
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
         selectors = {
-            'url': 'h3.search-item__title a', 
-            'title': 'h3.search-item__title a', 
-            'text': 'p.search-item__body', 
-            'links': 'li.search-result.search-item', 
-            'next': {
-                'form': 'nav.pagination form[name=search-pagination]', 
-                'buttons': 'button[name=startat]'
-            }
+            'url': 'a.w-gl__result-url', 
+            'title': 'a.w-gl__result-title h3', 
+            'text': 'p.w-gl__description', 
+            'links': 'section.w-gl.w-gl--default div.w-gl__result', 
+            'next': {'form':'form.pagination__form', 'text':'Next'} 
         }
         return selectors[element]
     
@@ -167,22 +164,26 @@ class Startpage(Search):
         data = { 
             'query':self._query, 'cat':'web', 'cmd':'process_search', 
             'language':'english_uk', 'engine0':'v1all', 
-            'nj':'1', 't':'air', 'abp':'-1', 'submit1':'GO'
+            'pg':0, 'abp':-1
         }
-        return {'url':self._base_url, 'data':data}
+        url = self._base_url + '/sp/search'
+        return url, data
     
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
         selector = self._selectors('next')
-        form = tags.select_one(selector['form'])
-        buttons = tags.select(selector['buttons'])
+        forms = [
+            form for form in tags.select(selector['form']) 
+            if form.get_text(strip=True) == selector['text']
+        ]
         url, data = None, None
-
-        if form and len(buttons) == 2 and buttons[1].get('value') != '-1':
-            data = {i['name']:i.get('value', '') for i in form.select('input[name]')}
-            data['startat'] = buttons[1]['value']
-            url = form.get('action')
-        return {'url':url, 'data':data}
+        if forms:
+            url = self._base_url + forms[0]['action']
+            data = {
+                i['name']:i.get('value', '') 
+                for i in forms[0].select('input')
+            }
+        return url, data
 
 
 class Ask(Search):
@@ -199,27 +200,30 @@ class Ask(Search):
             'title': 'a.PartialSearchResults-item-title-link.result-link', 
             'text': 'p.PartialSearchResults-item-abstract', 
             'links': 'div.PartialSearchResults-body div.PartialSearchResults-item', 
-            'next': 'ul.PartialWebPagination a[href]'
+            'next': 'li.PartialWebPagination-next a[href]'
         }
         return selectors[element]
     
     def _first_page(self):
         '''Returns the initial page and query.'''
-        page = u'{}/web?q={}&qo=homepageSearchBox'.format(self._base_url, self._query)
-        return {'url':page, 'data':None}
+        page = u'{}/web?o=0&l=dir&qo=serpSearchTopBox&q={}'
+        url = page.format(self._base_url, self._query)
+        return url, None
     
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
-        next_page = tags.select(self._selectors('next'))
-        url = (self._base_url + next_page[-1]['href']) if next_page else None
-        return {'url':url, 'data':None}
+        next_page = tags.select_one(self._selectors('next'))
+        url = None
+        if next_page:
+            url = self._base_url + next_page['href']
+        return url, None
 
 
 class Dogpile(Search):
     '''Seaches dogpile.com'''
     def __init__(self, proxy=cfg.proxy, timeout=cfg.timeout):
         super(Dogpile, self).__init__(proxy, timeout)
-        self._base_url = 'http://results.dogpile.com'
+        self._base_url = 'https://www.dogpile.com'
         self._name = 'Dogpile'
     
     def _selectors(self, element):
@@ -235,15 +239,15 @@ class Dogpile(Search):
     
     def _first_page(self):
         '''Returns the initial page and query.'''
-        page = u'{}/serp?q={}'.format(self._base_url, self._query)
-        return {'url':page, 'data':None}
+        url = u'{}/serp?q={}'.format(self._base_url, self._query)
+        return url, None
     
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
         selector = self._selectors('next')
         next_page = self._get_tag_item(tags.select_one(selector), 'href')
         url = (self._base_url + next_page) if next_page else None
-        return {'url':url, 'data':None} 
+        return url, None
 
     def _get_url(self, link, item='text'):
         selector = self._selectors('url')
@@ -281,7 +285,7 @@ class Searx(Search):
             'q':self._query, 
             'category_general':'on', 'time_range':'', 'language':'all'
         }
-        return {'url':self._base_url, 'data':data}
+        return self._base_url, data
     
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
@@ -290,51 +294,50 @@ class Searx(Search):
         if next_page:
             data = {i['name']:i.get('value', '') for i in next_page.select('input')}
             url = self._base_url + next_page['action']
-        return {'url':url, 'data':data}
+        return url, data
 
 
-class Unbubble(Search):
-    '''Seaches unbubble.eu'''
+class Aol(Search):
+    '''Seaches Aol.eu'''
     def __init__(self, proxy=cfg.proxy, timeout=cfg.timeout):
-        super(Unbubble, self).__init__(proxy, timeout)
-        self._base_url = 'https://www.unbubble.eu'
-        self._name = 'Unbubble'
+        super(Aol, self).__init__(proxy, timeout)
+        self._base_url = 'https://search.aol.com'
+        self._name = 'Aol'
     
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
         selectors = {
-            'url': 'div.link a[href]', 
-            'title': 'h3.title', 
-            'text': 'div.snippet', 
-            'links': 'ol.result-list div.text-col', 
-            'next': 'div.page-switcher a[rel=next]'
+            'url': 'div.compTitle > div > span', 
+            'title': 'div.compTitle h3.title', 
+            'text': 'div.compText', 
+            'links': 'ol.searchCenterMiddle li', 
+            'next': 'div.compPagination a.next'
         }
         return selectors[element]
     
     def _first_page(self):
         '''Returns the initial page and query.'''
-        page = u'{}/?q={}&focus=web&rc=100&rp=1'.format(self._base_url, self._query)
-        return {'url':page, 'data':None}
+        s = u'{}/aol/search?q={}'
+        return (s.format(self._base_url, self._query), None)
     
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
-        next_page = self._get_tag_item(tags.select_one(self._selectors('next')), 'href')
-        url = (self._base_url + next_page) if next_page else None
-        return {'url':url, 'data':None} 
+        css = self._selectors('next')
+        return (self._get_tag_item(tags.select_one(css), 'href'), None)
 
-    def _get_url(self, link, item='href'):
-        link = self._get_tag_item(link.select_one(self._selectors('url')), item)
-        return utl.unquote_url(link.split(u'/?u=')[1])
+    def _get_url(self, link, item='text'):
+        url = self._get_tag_item(link.select_one(self._selectors('url')), item)
+        return 'http://' + utl.unquote_url(url)
 
 
 class Torch(Search):
-    '''Uses torch search engine. Requires tor proxy.'''
+    '''Uses torch search engine. Requires TOR proxy.'''
     def __init__(self, proxy=cfg.tor, timeout=cfg.timeout):
         super(Torch, self).__init__(proxy, timeout)
         self._base_url = 'http://xmh57jrzrnw6insl.onion/4a1f6b371c/search.cgi'
         self._name = 'Torch'
         if not proxy:
-            utl.console('Torch requires tor proxy!', level=utl.Level.warning)
+            utl.console('Torch requires TOR proxy!', level=utl.Level.warning)
     
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
@@ -349,8 +352,8 @@ class Torch(Search):
     
     def _first_page(self):
         '''Returns the initial page and query.'''
-        page = u'{}?q={}&cmd=Search!&ps=50'.format(self._base_url, self._query)
-        return {'url':page, 'data':None}
+        url = u'{}?q={}&cmd=Search!&ps=50'.format(self._base_url, self._query)
+        return url, None
     
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
@@ -360,10 +363,10 @@ class Torch(Search):
             if i.text == selector['text']
         ]
         url = (self._base_url + next_page[0]) if next_page else None
-        return {'url':url, 'data':None}
+        return url, None
 
 
-search_engines = { 
+engines_dict = { 
     'google': Google, 
     'bing': Bing, 
     'yahoo': Yahoo, 
@@ -372,51 +375,66 @@ search_engines = {
     'dogpile': Dogpile, 
     'ask': Ask, 
     'searx': Searx, 
-    'unbubble': Unbubble, 
-    'torch': Torch 
+    'aol': Aol, 
+    'torch': Torch, 
 }
 
 
 class Multi(object):
     '''Uses multiple search engines.'''
     def __init__(self, engines, proxy=cfg.proxy, timeout=cfg.timeout):
-        self.engines = [
+        self._engines = [
             e(proxy, timeout) 
-            for e in search_engines.values() 
+            for e in engines_dict.values() 
             if e.__name__.lower() in engines
         ]
         self.results = Results()
+        self.unique_urls = False
+        self.unique_domains = False
+        self._filter = None
 
-    def search(self, query, pages=cfg.max_pages, unique=False): 
-        '''Searches all engines.'''
-        for engine in self.engines:
-            self.results._results += engine.search(query, pages, unique)._results
-        self._query = self.engines[0]._query
+    def set_search_operator(self, operator):
+        '''Filters search results based on the operator.'''
+        self._filter = operator
+    
+    def search(self, query, pages=cfg.search_pages): 
+        '''Searches all engines and collects teh results.'''
+        for engine in self._engines:
+            engine.unique_urls = self.unique_urls
+            engine.unique_domains = self.unique_domains
+            engine.set_search_operator(self._filter)
+
+            for item in engine.search(query, pages):
+                if self.unique_urls and item['link'] in self.results.links():
+                    continue
+                if self.unique_domains and item['host'] in self.results.hosts():
+                    continue
+                self.results._results.append(item)
+        self._query = self._engines[0]._query
         return self.results
     
-    def report(self, output=None):
-        '''
-        Prints search results and creates report files.
-
-        :param output: str Optional, the report format (html, csv).
-        '''
+    def report(self, output=None, path=None):
+        '''Prints search results and/or creates report files.'''
         utl.console(' ')
-        utl.print_results(self.engines)
-        file_name = u'_'.join(self._query.split())
-        path = cfg.report_files_dir + file_name
+        utl.print_results(self._engines)
+        if not self.results._results:
+            return
+        if not path:
+            path = u'_'.join(self._query.split())
+            path = cfg.os_path.join(cfg.report_files_dir, path)
 
         if 'html' in str(output).lower():
-            utl.write_file(utl.html_results(self.engines), path + u'.html') 
+            utl.write_file(utl.html_results(self._engines), path + u'.html') 
         if 'csv' in str(output).lower():
-            utl.write_file(utl.csv_results(self.engines), path + u'.csv')
+            utl.write_file(utl.csv_results(self._engines), path + u'.csv')
+        if 'json' in str(output).lower():
+            utl.write_file(utl.json_results(self._engines), path + u'.json')
 
 
 class All(Multi):
     '''Uses all search engines.'''
     def __init__(self, proxy=cfg.proxy, timeout=cfg.timeout):
         super(All, self).__init__(
-            list(search_engines), proxy, timeout
+            list(engines_dict), proxy, timeout
         )
-
-
 
