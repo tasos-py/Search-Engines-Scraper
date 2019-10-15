@@ -1,10 +1,12 @@
 from __future__ import print_function
 import requests
 import csv
+import json
 import io
 from collections import namedtuple
-from lib import windows_cmd_encoding
-import config
+
+from ..libs import windows_cmd_encoding
+from .. import config
 
 
 class Http:
@@ -14,28 +16,29 @@ class Http:
         self.timeout = timeout
         self.client.proxies = self._set_proxy(proxy)
         self.client.headers['User-Agent'] = config.user_agent
+        self.response = namedtuple('response', ['http', 'html'])
 
     def get(self, page, ref=None):
         '''GET request.'''
         headers = {'Referer': self._quote(ref or page)}
         try:
             req = self.client.get(
-                self._quote(page), headers = headers, timeout = self.timeout
+                self._quote(page), headers=headers, timeout=self.timeout
             )
         except requests.exceptions.RequestException as e:
-            return {'http':0, 'html':e.__doc__}
-        return {'http':req.status_code, 'html':req.text}
+            return self.response(http=0, html=e.__doc__)
+        return self.response(http=req.status_code, html=req.text)
     
     def post(self, page, data, ref=None):
         '''POST request.'''
         headers = {'Referer': self._quote(ref or page)}
         try:
             req = self.client.post(
-                quote_url(page), data, headers = headers, timeout = self.timeout
+                quote_url(page), data, headers=headers, timeout=self.timeout
             )
         except requests.exceptions.RequestException as e:
-            return {'http':0, 'html':e.__doc__}
-        return {'http':req.status_code, 'html':req.text}
+            return self.response(http=0, html=e.__doc__)
+        return self.response(http=req.status_code, html=req.text)
     
     def _quote(self, url):
         '''URL-encodes URLs.'''
@@ -47,7 +50,7 @@ class Http:
         '''Returns HTTP, HTTPS, SOCKS proxies dictionary.'''
         if proxy:
             if not is_url(proxy):
-                console(u'Invalid proxy format!', level=Level.warning)
+                raise ValueError('Invalid proxy format!')
             proxy = {'http':proxy, 'https':proxy}
         return proxy
 
@@ -75,7 +78,7 @@ def domain(url):
     return host.lower().split(':')[0].replace('www.', '')
 
 def encode_str(s, encoding='utf-8', errors='replace'):
-    '''Encodes unicode to str - str to bytes.'''
+    '''Encodes unicode to str, str to bytes.'''
     return s if type(s) is bytes else s.encode(encoding, errors=errors)
 
 def decode_bytes(s, encoding='utf-8', errors='replace'):
@@ -84,7 +87,7 @@ def decode_bytes(s, encoding='utf-8', errors='replace'):
 
 
 class Html:
-    '''HTML templates.'''
+    '''HTML template.'''
     html = u'''<html>
     <head>
     <meta charset="UTF-8">
@@ -131,7 +134,7 @@ def print_results(engines):
     for engine in engines:
         console(engine._name + u' results') 
         for i, v in enumerate(engine.results, 1):
-            console(u'{:<3}{}'.format(i, v['link'])) 
+            console(u'{:<4}{}'.format(i, v['link'])) 
         console(u' ')
 
 def html_results(engines):
@@ -164,10 +167,16 @@ def csv_results(engines):
             data.append(row)
     return data
 
+def json_results(engines):
+    '''Creates json report.'''
+    jobj = {se._name: [i for i in se.results] for se in engines}
+    return json.dumps(jobj)
+
+
 def write_file(data, path, encoding='utf-8'):
     '''Creates report files.'''
     try:
-        if config.python_version == 2 and type(data) is list:
+        if config.python_version == 2 and type(data) in (list, str):
             f = io.open(path, 'wb') 
         else: 
             f = io.open(path, 'w', encoding=encoding, newline='')
@@ -190,5 +199,4 @@ Level = namedtuple('Level', ['info', 'warning', 'error'])(
     warning = u'Warning: ',
     error = u'Error: '
 )
-
 
