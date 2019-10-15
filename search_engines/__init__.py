@@ -1,8 +1,7 @@
 from .core.engines import *
 
-
 __title__ = 'search_engines'
-__version__ = '0.2'
+__version__ = '0.4'
 __author__ = 'Tasos M. Adamopoulos'
 
 __all__ = [
@@ -14,7 +13,7 @@ __all__ = [
     'Dogpile', 
     'Ask', 
     'Searx', 
-    'Unbubble', 
+    'Aol', 
     'Torch' 
 ]
 
