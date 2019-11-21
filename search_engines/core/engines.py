@@ -402,7 +402,8 @@ class Multi(object):
         for engine in self._engines:
             engine.unique_urls = self.unique_urls
             engine.unique_domains = self.unique_domains
-            engine.set_search_operator(self._filter)
+            if self._filter:
+                engine.set_search_operator(self._filter)
 
             for item in engine.search(query, pages):
                 if self.unique_urls and item['link'] in self.results.links():
