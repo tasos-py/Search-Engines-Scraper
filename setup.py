@@ -6,7 +6,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='search_engines',
-    version='0.4',
+    version='0.5',
     description='Search Engines Scraper',
     author='Tasos M. Adamopoulos',
     license='MIT',
