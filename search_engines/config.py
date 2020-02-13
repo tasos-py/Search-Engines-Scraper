@@ -3,25 +3,28 @@ from sys import version_info
 
 
 ## Python version 
-python_version = version_info.major
+PYTHON_VERSION = version_info.major
 
 ## Maximum number or pages to search
-search_pages = 10
+SEARCH_ENGINE_RESULTS_PAGES = 20
 
 ## HTTP request timeout 
-timeout = 10
+TIMEOUT = 10
 
-## User-Agent string 
-user_agent = 'Mozilla/5.0 (Windows NT 6.1; rv:51.0) Gecko/20100101 Firefox/51.0'
+## Default User-Agent string 
+USER_AGENT = 'search_engines/0.5 Repo: https://github.com/tasos-py/Search-Engines-Scraper'
 
-## Proxy address 
-proxy = None
+## Fake User-Agent string - Google desn't like the default user-agent
+FAKE_USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; rv:73.0) Gecko/20100101 Firefox/73.0'
 
-## TOR proxy address 
-tor = 'socks5h://127.0.0.1:9050'
+## Proxy server 
+PROXY = None
 
-base_dir = os_path.abspath(os_path.dirname(os_path.abspath(__file__)))
+## TOR proxy server 
+TOR = 'socks5h://127.0.0.1:9050'
 
-## Path to report files 
-report_files_dir = os_path.join(base_dir, 'reports') + os_path.sep
+_base_dir = os_path.abspath(os_path.dirname(os_path.abspath(__file__)))
+
+## Path to output files 
+OUTPUT_DIR = os_path.join(_base_dir, 'search_results') + os_path.sep
 
