@@ -1,19 +1,19 @@
-from .core.engines import *
+from .engines import *
+
 
 __title__ = 'search_engines'
-__version__ = '0.4'
+__version__ = '0.5'
 __author__ = 'Tasos M. Adamopoulos'
 
 __all__ = [
     'Google', 
     'Bing', 
     'Yahoo', 
+    'Aol', 
     'Duckduckgo', 
     'Startpage', 
     'Dogpile', 
     'Ask', 
-    'Searx', 
-    'Aol', 
-    'Torch' 
+    'Mojeek', 
+    'Torch'
 ]
-
