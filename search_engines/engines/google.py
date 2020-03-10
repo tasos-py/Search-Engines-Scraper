@@ -9,7 +9,7 @@ class Google(SearchEngine):
         super(Google, self).__init__(proxy, timeout)
         self._base_url = 'https://www.google.com'
         self._delay = (2, 6)
-        self.set_user_agent(FAKE_USER_AGENT)
+        self.set_headers({'User-Agent':FAKE_USER_AGENT})
     
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
