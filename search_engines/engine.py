@@ -110,17 +110,20 @@ class SearchEngine(object):
             self.results.append(item)
 
     def _is_ok(self, response):
-        '''Checks if the HTTP response is OK 200.'''
+        '''Checks if the HTTP response is 200 OK.'''
         if response.http == 200:
             return True
         msg = ('HTTP ' + str(response.http)) if response.http else response.html
         out.console(msg, level=out.Level.error)
         return False
     
-    def set_user_agent(self, ua_string):
-        '''Sets the User-Agent string.'''
-        self._http_client.session.headers['User-Agent'] = ua_string
-
+    def set_headers(self, headers):
+        '''Sets HTTP headers.
+        
+        :param headers: dict The headers 
+        '''
+        self._http_client.session.headers.update(headers)
+    
     def set_search_operator(self, operator):
         '''Filters search results based on the operator. 
         Supported operators: 'url', 'title', 'text', 'host'
