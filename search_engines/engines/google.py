@@ -18,7 +18,7 @@ class Google(SearchEngine):
             'title': 'a', 
             'text': 'span.st', 
             'links': 'div#search div[class=g]', 
-            'next': 'table#nav td.b.navend a#pnnext'
+            'next': 'div#foot a#pnnext'
         }
         return selectors[element]
     
