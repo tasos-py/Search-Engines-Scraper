@@ -7,7 +7,7 @@ class Bing(SearchEngine):
     def __init__(self, proxy=PROXY, timeout=TIMEOUT):
         super(Bing, self).__init__(proxy, timeout)
         self._base_url = 'https://www.bing.com'
-        elf.set_headers({'User-Agent':FAKE_USER_AGENT})
+        self.set_headers({'User-Agent':FAKE_USER_AGENT})
 
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
