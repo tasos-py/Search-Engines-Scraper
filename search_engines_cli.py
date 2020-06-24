@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 import argparse
-from search_engines import config as cfg
 
 try:
     from search_engines.engines import search_engines_dict
@@ -16,7 +15,7 @@ def main():
     ap.add_argument('-q', help='query', required=True)
     ap.add_argument('-e', help='search engine(s) - ' + ', '.join(search_engines_dict), default='google')
     ap.add_argument('-o', help='output file [html, csv, json]', default='print')
-    ap.add_argument('-n', help='filename for output file', default=cfg.OUTPUT_DIR+'output')
+    ap.add_argument('-n', help='filename for output file', default=config.OUTPUT_DIR+'output')
     ap.add_argument('-p', help='number of pages', default=config.SEARCH_ENGINE_RESULTS_PAGES, type=int)
     ap.add_argument('-f', help='filter results [url, title, text, host]', default=None)
     ap.add_argument('-i', help='ignore duplicats, useful when multiple search engines are used', action='store_true')
