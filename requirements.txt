@@ -1,2 +1,3 @@
 requests[socks]
 bs4
+fake_useragent
