@@ -18,7 +18,7 @@ _[Torch](http://xmh57jrzrnw6insl.onion/4a1f6b371c/search.cgi)_
 ## Features  
 
  - Creates output files (html, csv, json).  
- - Supports search operators (`url`, `title`, `text`).  
+ - Supports search filters (url, title, text).  
  - HTTP and SOCKS proxy support.  
  - Collects dark web links with Torch.  
  - Easy to add new search engines. You can add a new engine by creating a new class in `search_engines/engines/` and add it to the  `search_engines_dict` dictionary in `search_engines/engines/__init__.py`. The new class should subclass `SearchEngine`, and override the following methods: `_selectors`, `_first_page`, `_next_page`. 
