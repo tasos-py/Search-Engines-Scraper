@@ -51,4 +51,5 @@ class Google(SearchEngine):
     def _get_text(self, tag, item='text'):
         '''Returns the text of search results items.'''
         selector = self._selectors('text')
-        return self._get_tag_item(tag.select(selector)[-1], item)
+        tag = tag.select(selector) or [None]
+        return self._get_tag_item(tag[-1], item)
