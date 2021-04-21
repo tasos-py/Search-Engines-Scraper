@@ -18,7 +18,7 @@ class Google(SearchEngine):
         selectors = {
             'url': 'a[href]', 
             'title': 'a', 
-            'text': 'span.st', 
+            'text': 'span > span', 
             'links': 'div#search div[class=g]', 
             'next': 'a[href][aria-label="Page {page}"]'
         }
@@ -34,7 +34,6 @@ class Google(SearchEngine):
         self._current_page += 1
         selector = self._selectors('next').format(page=self._current_page)
         next_page = self._get_tag_item(tags.select_one(selector), 'href')
-        
         url = None
         if next_page:
             url = self._base_url + next_page
@@ -48,3 +47,8 @@ class Google(SearchEngine):
         if url.startswith(u'/url?q='):
             url = url.replace(u'/url?q=', u'').split(u'&sa=')[0]
         return unquote_url(url)
+
+    def _get_text(self, tag, item='text'):
+        '''Returns the text of search results items.'''
+        selector = self._selectors('text')
+        return self._get_tag_item(tag.select(selector)[-1], item)
