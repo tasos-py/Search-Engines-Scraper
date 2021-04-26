@@ -3,6 +3,7 @@ from time import sleep
 from random import uniform as random_uniform
 from collections import namedtuple
 
+from .results import SearchResults
 from .http_client import HttpClient
 from . import utils
 from . import output as out
@@ -27,6 +28,8 @@ class SearchEngine(object):
         '''Collects only unique URLs.'''
         self.ignore_duplicate_domains = False
         '''Collects only unique domains.'''
+        self.is_banned = False
+        '''Indicates if a ban occured'''
 
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
@@ -111,6 +114,8 @@ class SearchEngine(object):
 
     def _is_ok(self, response):
         '''Checks if the HTTP response is 200 OK.'''
+        self.is_banned = response.http in [403, 429, 503]
+        
         if response.http == 200:
             return True
         msg = ('HTTP ' + str(response.http)) if response.http else response.html
@@ -193,47 +198,3 @@ class SearchEngine(object):
             out.write_file(out.create_csv_data([self]), path + u'.csv') 
         if out.JSON in output:
             out.write_file(out.create_json_data([self]), path + u'.json')
-
-
-class SearchResults(object):
-    '''Stores the search results'''
-    def __init__(self, items=None):
-        self._results = items or []
-    
-    def links(self):
-        '''Returns the links found in search results'''
-        return [row.get('link') for row in self._results]
-    
-    def titles(self):
-        '''Returns the titles found in search results'''
-        return [row.get('title') for row in self._results]
-    
-    def text(self):
-        '''Returns the text found in search results'''
-        return [row.get('text') for row in self._results]
-    
-    def hosts(self):
-        '''Returns the domains found in search results'''
-        return [row.get('host') for row in self._results]
-    
-    def results(self):
-        '''Returns all data found in search results'''
-        return self._results
-    
-    def __getitem__(self, index):
-        return self._results[index]
-    
-    def __len__(self):
-        return len(self._results)
-
-    def __str__(self):
-        return '<SearchResults ({} items)>'.format(len(self._results))
-    
-    def append(self, item):
-        '''appends an item to the results list.'''
-        self._results.append(item)
-    
-    def extend(self, items):
-        '''appends items to the results list.'''
-        self._results.extend(items)
-
