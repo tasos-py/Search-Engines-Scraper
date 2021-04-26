@@ -1,4 +1,4 @@
-from .engine import SearchResults
+from .results import SearchResults
 from .engines import search_engines_dict
 from . import output as out
 from . import config as cfg
@@ -17,6 +17,7 @@ class MultipleSearchEngines(object):
         self.ignore_duplicate_urls = False
         self.ignore_duplicate_domains = False
         self.results = SearchResults()
+        self.banned_engines = []
 
     def set_search_operator(self, operator):
         '''Filters search results based on the operator.'''
@@ -36,6 +37,9 @@ class MultipleSearchEngines(object):
                 if self.ignore_duplicate_domains and item['host'] in self.results.hosts():
                     continue
                 self.results._results.append(item)
+            
+            if engine.is_banned:
+                self.banned_engines.append(engine.__class__.__name__)
         return self.results
     
     def output(self, output=out.PRINT, path=None):
@@ -62,4 +66,3 @@ class AllSearchEngines(MultipleSearchEngines):
         super(AllSearchEngines, self).__init__(
             list(search_engines_dict), proxy, timeout
         )
-
