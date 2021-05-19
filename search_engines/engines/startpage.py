@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 
 from ..engine import SearchEngine
 from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
+from .. import output as out
 
 
 class Startpage(SearchEngine):
@@ -19,7 +20,8 @@ class Startpage(SearchEngine):
             'text': 'p.w-gl__description', 
             'links': 'section.w-gl div.w-gl__result', 
             'next': {'form':'form.pagination__form', 'text':'Next'},
-            'search_form': 'form#search input[name]'
+            'search_form': 'form#search input[name]',
+            'blocked_form': 'form#blocked_feedback_form'
         }
         return selectors[element]
     
@@ -53,3 +55,17 @@ class Startpage(SearchEngine):
                 for i in forms[0].select('input')
             }
         return {'url':url, 'data':data}
+    
+    def _is_ok(self, response):
+        '''Checks if the HTTP response is 200 OK.'''
+        soup = BeautifulSoup(response.html, 'html.parser')
+        selector = self._selectors('blocked_form')
+        is_blocked = soup.select_one(selector)
+        
+        self.is_banned = response.http in [403, 429, 503] or is_blocked
+        
+        if response.http == 200 and not is_blocked:
+            return True
+        msg = 'Banned' if is_blocked else ('HTTP ' + str(response.http)) if response.http else response.html
+        out.console(msg, level=out.Level.error)
+        return False
