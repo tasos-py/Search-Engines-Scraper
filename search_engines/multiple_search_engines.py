@@ -30,14 +30,20 @@ class MultipleSearchEngines(object):
             engine.ignore_duplicate_domains = self.ignore_duplicate_domains
             if self._filter:
                 engine.set_search_operator(self._filter)
-
-            for item in engine.search(query, pages):
-                if self.ignore_duplicate_urls and item['link'] in self.results.links():
-                    continue
-                if self.ignore_duplicate_domains and item['host'] in self.results.hosts():
-                    continue
-                self.results._results.append(item)
             
+            engine_results = engine.search(query, pages)
+            if engine.ignore_duplicate_urls:
+                engine_results._results = [
+                    item for item in engine_results._results 
+                    if item['link'] not in self.results.links()
+                ]
+            if self.ignore_duplicate_domains:
+                engine_results._results = [
+                    item for item in engine_results._results 
+                    if item['host'] not in self.results.hosts()
+                ]
+            self.results._results += engine_results._results
+
             if engine.is_banned:
                 self.banned_engines.append(engine.__class__.__name__)
         return self.results
@@ -66,3 +72,4 @@ class AllSearchEngines(MultipleSearchEngines):
         super(AllSearchEngines, self).__init__(
             list(search_engines_dict), proxy, timeout
         )
+
