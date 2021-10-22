@@ -15,5 +15,6 @@ __all__ = [
     'Dogpile', 
     'Ask', 
     'Mojeek', 
+    'Qwant',
     'Torch'
 ]
