@@ -8,6 +8,7 @@ from .mojeek import Mojeek
 from .startpage import Startpage
 from .torch import Torch
 from .yahoo import Yahoo
+from .qwant import Qwant
 
 
 search_engines_dict = { 
@@ -20,6 +21,6 @@ search_engines_dict = {
     'dogpile': Dogpile, 
     'ask': Ask, 
     'mojeek': Mojeek, 
+    'qwant': Qwant, 
     'torch': Torch 
 }
-
