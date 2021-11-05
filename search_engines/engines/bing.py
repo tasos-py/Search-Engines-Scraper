@@ -13,7 +13,7 @@ class Bing(SearchEngine):
         '''Returns the appropriate CSS selector.'''
         selectors = {
             'url': 'a[href]', 
-            'title': 'a', 
+            'title': 'h2', 
             'text': 'p', 
             'links': 'ol#b_results > li.b_algo', 
             'next': 'div#b_content nav[role="navigation"] a.sb_pagN'
