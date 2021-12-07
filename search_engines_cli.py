@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import argparse
+import asyncio
 
 try:
     from search_engines.engines import search_engines_dict
@@ -10,7 +11,7 @@ except ImportError as e:
     raise ImportError(msg.format(str(e)))
 
 
-def main():
+async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('-q', help='query', required=True)
     ap.add_argument('-e', help='search engine(s) - ' + ', '.join(search_engines_dict), default='google')
@@ -44,9 +45,10 @@ def main():
         if args.f:
             engine.set_search_operator(args.f)
         
-        engine.search(args.q, args.p)
+        await engine.search(args.q, args.p)
+        await engine.close()
         engine.output(args.o, args.n)
 
 if __name__ == '__main__':
-    main()
+    asyncio.get_event_loop().run_until_complete(main())
 

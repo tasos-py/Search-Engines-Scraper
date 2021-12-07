@@ -25,9 +25,9 @@ class Startpage(SearchEngine):
         }
         return selectors[element]
     
-    def _first_page(self):
+    async def _first_page(self):
         '''Returns the initial page and query.'''
-        response = self._get_page(self._base_url)
+        response = await self._get_page(self._base_url)
         tags = BeautifulSoup(response.html, "html.parser")
         selector = self._selectors('search_form')
 

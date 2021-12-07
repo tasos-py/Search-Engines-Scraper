@@ -1,40 +1,51 @@
-import requests
+import aiohttp
 from collections import namedtuple
+
+from aiohttp_socks import ProxyConnector
 
 from .config import TIMEOUT, PROXY, USER_AGENT
 from . import utils as utl
 
 
 class HttpClient(object):
-    '''Performs HTTP requests. A `requests` wrapper, essentialy'''
+    '''Performs HTTP requests. A `aiohttp` wrapper, essentialy'''
     def __init__(self, timeout=TIMEOUT, proxy=PROXY):
-        self.session = requests.session()
-        self.session.proxies = self._set_proxy(proxy)
+        if proxy:
+            connector = ProxyConnector.from_url(proxy)
+            self.session = aiohttp.ClientSession(connector=connector)
+        else:
+            self.session = aiohttp.ClientSession()
+
         self.session.headers['User-Agent'] = USER_AGENT
         self.session.headers['Accept-Language'] = 'en-GB,en;q=0.5'
 
         self.timeout = timeout
         self.response = namedtuple('response', ['http', 'html'])
 
-    def get(self, page):
+    async def close(self):
+        await self.session.close()
+
+    async def get(self, page):
         '''Submits a HTTP GET request.'''
         page = self._quote(page)
         try:
-            req = self.session.get(page, timeout=self.timeout)
+            req = await self.session.get(page, headers=self.session.headers, timeout=self.timeout)
+            text = await req.text()
             self.session.headers['Referer'] = page
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             return self.response(http=0, html=e.__doc__)
-        return self.response(http=req.status_code, html=req.text)
+        return self.response(http=req.status, html=text)
     
-    def post(self, page, data):
+    async def post(self, page, data):
         '''Submits a HTTP POST request.'''
         page = self._quote(page)
         try:
-            req = self.session.post(page, data, timeout=self.timeout)
+            req = await self.session.post(page, data=data, headers=self.session.headers, timeout=self.timeout)
+            text = await req.text()
             self.session.headers['Referer'] = page
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             return self.response(http=0, html=e.__doc__)
-        return self.response(http=req.status_code, html=req.text)
+        return self.response(http=req.status, html=text)
     
     def _quote(self, url):
         '''URL-encodes URLs.'''

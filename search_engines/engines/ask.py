@@ -19,7 +19,7 @@ class Ask(SearchEngine):
         }
         return selectors[element]
     
-    def _first_page(self):
+    async def _first_page(self):
         '''Returns the initial page and query.'''
         url_str = u'{}/web?o=0&l=dir&qo=serpSearchTopBox&q={}'
         url = url_str.format(self._base_url, self._query)

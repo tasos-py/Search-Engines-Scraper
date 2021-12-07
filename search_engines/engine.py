@@ -31,11 +31,14 @@ class SearchEngine(object):
         self.is_banned = False
         '''Indicates if a ban occured'''
 
+    async def close(self):
+        await self._http_client.close()
+
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
         raise NotImplementedError()
     
-    def _first_page(self):
+    async def _first_page(self):
         '''Returns the initial page URL.'''
         raise NotImplementedError()
     
@@ -145,7 +148,7 @@ class SearchEngine(object):
             else:
                 self._filters += [operator]
     
-    def search(self, query, pages=cfg.SEARCH_ENGINE_RESULTS_PAGES): 
+    async def search(self, query, pages=cfg.SEARCH_ENGINE_RESULTS_PAGES):
         '''Queries the search engine, goes through the pages and collects the results.
         
         :param query: str The search query  
@@ -154,11 +157,11 @@ class SearchEngine(object):
         '''
         out.console('Searching {}'.format(self.__class__.__name__))
         self._query = utils.decode_bytes(query)
-        request = self._first_page()
+        request = await self._first_page()
 
         for page in range(1, pages + 1):
             try:
-                response = self._get_page(request['url'], request['data'])
+                response = await self._get_page(request['url'], request['data'])
                 if not self._is_ok(response):
                     break
                 tags = BeautifulSoup(response.html, "html.parser")

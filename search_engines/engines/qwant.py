@@ -23,7 +23,7 @@ class Qwant(SearchEngine):
         }
         return selectors[element]
     
-    def _first_page(self):
+    async def _first_page(self):
         '''Returns the initial page and query.'''
         url = self._base_url.format(self._query, self._offset)
         return {'url':url, 'data':None}

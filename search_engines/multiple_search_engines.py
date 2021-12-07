@@ -22,8 +22,12 @@ class MultipleSearchEngines(object):
     def set_search_operator(self, operator):
         '''Filters search results based on the operator.'''
         self._filter = operator
-    
-    def search(self, query, pages=cfg.SEARCH_ENGINE_RESULTS_PAGES): 
+
+    async def close(self):
+        for e in self._engines:
+            await e.close()
+
+    async def search(self, query, pages=cfg.SEARCH_ENGINE_RESULTS_PAGES):
         '''Searches multiples engines and collects the results.'''
         for engine in self._engines:
             engine.ignore_duplicate_urls = self.ignore_duplicate_urls
@@ -31,7 +35,7 @@ class MultipleSearchEngines(object):
             if self._filter:
                 engine.set_search_operator(self._filter)
             
-            engine_results = engine.search(query, pages)
+            engine_results = await engine.search(query, pages)
             if engine.ignore_duplicate_urls:
                 engine_results._results = [
                     item for item in engine_results._results 

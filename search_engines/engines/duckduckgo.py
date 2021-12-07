@@ -19,7 +19,7 @@ class Duckduckgo(SearchEngine):
         }
         return selectors[element]
     
-    def _first_page(self):
+    async def _first_page(self):
         '''Returns the initial page and query.'''
         data = {'q':self._query, 'b':'', 'kl':'us-en'} 
         return {'url':self._base_url, 'data':data}

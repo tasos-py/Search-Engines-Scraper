@@ -24,7 +24,7 @@ class Google(SearchEngine):
         }
         return selectors[element]
     
-    def _first_page(self):
+    async def _first_page(self):
         '''Returns the initial page and query.'''
         url = u'{}/search?q={}'.format(self._base_url, self._query)
         return {'url':url, 'data':None}

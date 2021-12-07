@@ -1,2 +1,4 @@
-requests[socks]
+requests
+aiohttp
+aiohttp_socks
 bs4
