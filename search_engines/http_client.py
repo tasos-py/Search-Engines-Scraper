@@ -16,8 +16,10 @@ class HttpClient(object):
         else:
             self.session = aiohttp.ClientSession()
 
-        self.session.headers['User-Agent'] = USER_AGENT
-        self.session.headers['Accept-Language'] = 'en-GB,en;q=0.5'
+        self.headers = {
+            'User-Agent': USER_AGENT,
+            'Accept-Language': 'en-GB,en;q=0.5',
+        }
 
         self.timeout = timeout
         self.response = namedtuple('response', ['http', 'html'])
@@ -29,10 +31,10 @@ class HttpClient(object):
         '''Submits a HTTP GET request.'''
         page = self._quote(page)
         try:
-            req = await self.session.get(page, headers=self.session.headers, timeout=self.timeout)
+            req = await self.session.get(page, headers=self.headers, timeout=self.timeout)
             text = await req.text()
-            self.session.headers['Referer'] = page
-        except Exception as e:
+            self.headers['Referer'] = page
+        except aiohttp.client_exception.ClientError as e:
             return self.response(http=0, html=e.__doc__)
         return self.response(http=req.status, html=text)
     
@@ -40,10 +42,10 @@ class HttpClient(object):
         '''Submits a HTTP POST request.'''
         page = self._quote(page)
         try:
-            req = await self.session.post(page, data=data, headers=self.session.headers, timeout=self.timeout)
+            req = await self.session.post(page, data=data, headers=self.headers, timeout=self.timeout)
             text = await req.text()
-            self.session.headers['Referer'] = page
-        except Exception as e:
+            self.headers['Referer'] = page
+        except aiohttp.client_exception.ClientError as e:
             return self.response(http=0, html=e.__doc__)
         return self.response(http=req.status, html=text)
     

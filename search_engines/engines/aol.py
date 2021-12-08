@@ -4,8 +4,8 @@ from ..config import PROXY, TIMEOUT
 
 class Aol(Yahoo):
     '''Seaches aol.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
-        super(Aol, self).__init__(proxy, timeout)
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT, *args, **kwargs):
+        super(Aol, self).__init__(proxy, timeout, *args, **kwargs)
         self._base_url = u'https://search.aol.com'
 
     async def _first_page(self):

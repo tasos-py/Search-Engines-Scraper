@@ -104,6 +104,11 @@ def console(msg, end='\n', level=None):
     msg = clear_line + (level or u'') + msg
     print(msg, end=end)
 
+
+def devnull(msg, end='\n', level=None):
+    pass
+
+
 Level = namedtuple('Level', ['info', 'warning', 'error'])(
     info = u'INFO ',
     warning = u'WARNING ',

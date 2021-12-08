@@ -45,8 +45,9 @@ async def main():
         if args.f:
             engine.set_search_operator(args.f)
         
-        await engine.search(args.q, args.p)
-        await engine.close()
+        async with engine as e:
+            await e.search(args.q, args.p)
+
         engine.output(args.o, args.n)
 
 if __name__ == '__main__':

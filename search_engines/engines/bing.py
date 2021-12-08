@@ -4,8 +4,8 @@ from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
 
 class Bing(SearchEngine):
     '''Searches bing.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
-        super(Bing, self).__init__(proxy, timeout)
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT, *args, **kwargs):
+        super(Bing, self).__init__(proxy, timeout, *args, **kwargs)
         self._base_url = 'https://www.bing.com'
         self.set_headers({'User-Agent':FAKE_USER_AGENT})
 

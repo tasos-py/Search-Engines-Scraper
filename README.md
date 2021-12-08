@@ -27,7 +27,7 @@ _[Torch](http://xmh57jrzrnw6insl.onion/4a1f6b371c/search.cgi)_
 ## Requirements  
 
 _Python 2.7 - 3.7_ with  
-_[Aiohttp](https://docs.aiohttp.org/en/stable/index.html)_ and  
+_[Aiohttp](https://docs.aiohttp.org/en/stable/index.html)_ and
 _[BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)_  
 
 ## Installation  

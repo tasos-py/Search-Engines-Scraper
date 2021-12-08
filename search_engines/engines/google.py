@@ -5,8 +5,8 @@ from ..utils import unquote_url
 
 class Google(SearchEngine):
     '''Searches google.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
-        super(Google, self).__init__(proxy, timeout)
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT, *args, **kwargs):
+        super(Google, self).__init__(proxy, timeout, *args, **kwargs)
         self._base_url = 'https://www.google.com'
         self._delay = (2, 6)
         self._current_page = 1

@@ -7,8 +7,8 @@ from ..utils import unquote_url
 
 class Qwant(SearchEngine):
     '''Searches qwant.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
-        super(Qwant, self).__init__(proxy, timeout)
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT, *args, **kwargs):
+        super(Qwant, self).__init__(proxy, timeout, *args, **kwargs)
         self._base_url = u'https://api.qwant.com/v3/search/web?q={}&count=10&locale=en_US&offset={}&device=desktop&safesearch=1'
         self._offset = 0
         self._max_offset = 40

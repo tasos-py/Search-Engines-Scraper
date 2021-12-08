@@ -5,8 +5,8 @@ from ..utils import unquote_url
 
 class Dogpile(SearchEngine):
     '''Seaches dogpile.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
-        super(Dogpile, self).__init__(proxy, timeout)
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT, *args, **kwargs):
+        super(Dogpile, self).__init__(proxy, timeout, *args, **kwargs)
         self._base_url = 'https://www.dogpile.com'
     
     def _selectors(self, element):

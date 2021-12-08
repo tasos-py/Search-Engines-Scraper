@@ -7,8 +7,8 @@ from .. import output as out
 
 class Startpage(SearchEngine):
     '''Searches startpage.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT): 
-        super(Startpage, self).__init__(proxy, timeout)
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT, *args, **kwargs):
+        super(Startpage, self).__init__(proxy, timeout, *args, **kwargs)
         self._base_url = 'https://www.startpage.com'
         self.set_headers({'User-Agent':FAKE_USER_AGENT})
     

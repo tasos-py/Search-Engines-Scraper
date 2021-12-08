@@ -1,5 +1,6 @@
+import asyncio
+
 from bs4 import BeautifulSoup
-from time import sleep
 from random import uniform as random_uniform
 from collections import namedtuple
 
@@ -12,15 +13,26 @@ from . import config as cfg
 
 class SearchEngine(object):
     '''The base class for all Search Engines.'''
-    def __init__(self, proxy=cfg.PROXY, timeout=cfg.TIMEOUT):
+    def __init__(self, proxy=cfg.PROXY, timeout=cfg.TIMEOUT, *args, **kwargs):
         '''
         :param str proxy: optional, a proxy server  
         :param int timeout: optional, the HTTP timeout
         '''
         self._http_client = HttpClient(timeout, proxy) 
-        self._delay = (1, 4)
         self._query = ''
         self._filters = []
+
+        self._min_delay = kwargs.get('min_delay', 1)
+        _max_delay = kwargs.get('max_delay', 4)
+        self._max_delay = max(self._min_delay, _max_delay)
+        self._delay = (self._min_delay, self._max_delay)
+
+        self.print_func = kwargs.get('print_func')
+        if not self.print_func:
+            self.print_func = out.console
+
+        if kwargs.get('suppress_console_output'):
+            self.print_func = out.devnull
 
         self.results = SearchResults()
         '''The search results.'''
@@ -31,8 +43,14 @@ class SearchEngine(object):
         self.is_banned = False
         '''Indicates if a ban occured'''
 
+    async def __aenter__(self):
+        return self
+
     async def close(self):
         await self._http_client.close()
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
 
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
@@ -122,7 +140,7 @@ class SearchEngine(object):
         if response.http == 200:
             return True
         msg = ('HTTP ' + str(response.http)) if response.http else response.html
-        out.console(msg, level=out.Level.error)
+        self.print_func(msg, level=out.Level.error)
         return False
     
     def set_headers(self, headers):
@@ -130,7 +148,7 @@ class SearchEngine(object):
         
         :param headers: dict The headers 
         '''
-        self._http_client.session.headers.update(headers)
+        self._http_client.headers.update(headers)
     
     def set_search_operator(self, operator):
         '''Filters search results based on the operator. 
@@ -144,7 +162,7 @@ class SearchEngine(object):
         for operator in operators:
             if operator not in supported_operators:
                 msg = u'Ignoring unsupported operator "{}"'.format(operator)
-                out.console(msg, level=out.Level.warning)
+                self.print_func(msg, level=out.Level.warning)
             else:
                 self._filters += [operator]
     
@@ -155,7 +173,7 @@ class SearchEngine(object):
         :param pages: int Optional, the maximum number of results pages to search  
         :returns SearchResults object
         '''
-        out.console('Searching {}'.format(self.__class__.__name__))
+        self.print_func('Searching {}'.format(self.__class__.__name__))
         self._query = utils.decode_bytes(query)
         request = await self._first_page()
 
@@ -169,16 +187,16 @@ class SearchEngine(object):
                 self._collect_results(items)
                 
                 msg = 'page: {:<8} links: {}'.format(page, len(self.results))
-                out.console(msg, end='')
+                self.print_func(msg, end='')
                 request = self._next_page(tags)
 
                 if not request['url']:
                     break
                 if page < pages:
-                    sleep(random_uniform(*self._delay))
+                    await asyncio.sleep(random_uniform(*self._delay))
             except KeyboardInterrupt:
                 break
-        out.console('', end='')
+        self.print_func('', end='')
         return self.results
     
     def output(self, output=out.PRINT, path=None):
@@ -191,7 +209,7 @@ class SearchEngine(object):
         output = (output or '').lower()
         if not path:
             path = cfg.os_path.join(cfg.OUTPUT_DIR, u'_'.join(self._query.split()))
-        out.console('')
+        self.print_func('')
 
         if out.PRINT in output:
             out.print_results([self])

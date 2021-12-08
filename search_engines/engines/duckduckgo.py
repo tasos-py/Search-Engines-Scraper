@@ -4,8 +4,8 @@ from ..config import PROXY, TIMEOUT
 
 class Duckduckgo(SearchEngine):
     '''Searches duckduckgo.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
-        super(Duckduckgo, self).__init__(proxy, timeout)
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT, *args, **kwargs):
+        super(Duckduckgo, self).__init__(proxy, timeout, *args, **kwargs)
         self._base_url = 'https://html.duckduckgo.com/html/'
     
     def _selectors(self, element):

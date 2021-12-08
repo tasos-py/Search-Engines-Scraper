@@ -4,8 +4,8 @@ from ..config import PROXY, TIMEOUT
 
 class Ask(SearchEngine):
     '''Searches ask.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
-        super(Ask, self).__init__(proxy, timeout)
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT, *args, **kwargs):
+        super(Ask, self).__init__(proxy, timeout, *args, **kwargs)
         self._base_url = 'https://uk.ask.com'
     
     def _selectors(self, element):

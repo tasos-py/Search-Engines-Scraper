@@ -5,8 +5,8 @@ from .. import output as out
 
 class Torch(SearchEngine):
     '''Uses torch search engine. Requires TOR proxy.'''
-    def __init__(self, proxy=TOR, timeout=TIMEOUT):
-        super(Torch, self).__init__(proxy, timeout)
+    def __init__(self, proxy=TOR, timeout=TIMEOUT, *args, **kwargs):
+        super(Torch, self).__init__(proxy, timeout, *args, **kwargs)
         self._base_url = u'http://torchdeedp3i2jigzjdmfpn5ttjhthh5wbmda2rr3jvqjg5p77c54dqd.onion'
         if not proxy:
             out.console('Torch requires TOR proxy!', level=out.Level.warning)

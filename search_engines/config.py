@@ -21,7 +21,7 @@ FAKE_USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; rv:84.0) Gecko/20100101 Firefox/
 PROXY = None
 
 ## TOR proxy server 
-TOR = 'socks5h://127.0.0.1:9050'
+TOR = 'socks5://127.0.0.1:9050'
 
 _base_dir = os_path.abspath(os_path.dirname(os_path.abspath(__file__)))
 

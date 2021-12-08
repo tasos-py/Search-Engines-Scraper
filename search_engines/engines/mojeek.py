@@ -4,8 +4,8 @@ from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
 
 class Mojeek(SearchEngine):
     '''Searches mojeek.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
-        super(Mojeek, self).__init__(proxy, timeout)
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT, *args, **kwargs):
+        super(Mojeek, self).__init__(proxy, timeout, *args, **kwargs)
         self._base_url = 'https://www.mojeek.com'
         self.set_headers({'User-Agent':FAKE_USER_AGENT})
     
