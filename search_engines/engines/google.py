@@ -18,8 +18,8 @@ class Google(SearchEngine):
         selectors = {
             'url': 'a[href]', 
             'title': 'a', 
-            'text': 'span > span', 
-            'links': 'div#search div[class=g]', 
+            'text': 'div[data-content-feature="1"]', 
+            'links': 'div#search div.g', 
             'next': 'a[href][aria-label="Page {page}"]'
         }
         return selectors[element]
@@ -47,9 +47,3 @@ class Google(SearchEngine):
         if url.startswith(u'/url?q='):
             url = url.replace(u'/url?q=', u'').split(u'&sa=')[0]
         return unquote_url(url)
-
-    def _get_text(self, tag, item='text'):
-        '''Returns the text of search results items.'''
-        selector = self._selectors('text')
-        tag = tag.select(selector) or [None]
-        return self._get_tag_item(tag[-1], item)
