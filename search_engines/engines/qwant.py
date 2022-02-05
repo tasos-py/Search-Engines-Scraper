@@ -11,7 +11,7 @@ class Qwant(SearchEngine):
         super(Qwant, self).__init__(proxy, timeout)
         self._base_url = u'https://api.qwant.com/v3/search/web?q={}&count=10&locale=en_US&offset={}&device=desktop&safesearch=1'
         self._offset = 0
-        self._max_offset = 40
+        self._max_offset = 50
         
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
@@ -39,7 +39,7 @@ class Qwant(SearchEngine):
 
     def _get_url(self, tag, item='href'):
         '''Returns the URL of search results item.'''
-        return unquote_url(tag[self._selectors('url')])
+        return unquote_url(tag.get(self._selectors('url'), u''))
     
     def _get_title(self, tag, item='text'):
         '''Returns the title of search results items.'''
