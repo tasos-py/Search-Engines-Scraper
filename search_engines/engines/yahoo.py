@@ -38,3 +38,11 @@ class Yahoo(SearchEngine):
         url = url.split(u'/RU=')[-1].split(u'/R')[0]
         return unquote_url(url)
 
+    def _get_title(self, tag, item='text'):
+        '''Returns the title of search results items.'''
+        title = tag.select_one(self._selectors('title'))
+        for span in title.select('span'):
+            span.decompose()
+        return self._get_tag_item(title, item)
+
+    

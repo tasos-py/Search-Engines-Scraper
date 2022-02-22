@@ -6,14 +6,14 @@ class Bing(SearchEngine):
     '''Searches bing.com'''
     def __init__(self, proxy=PROXY, timeout=TIMEOUT):
         super(Bing, self).__init__(proxy, timeout)
-        self._base_url = 'https://www.bing.com'
+        self._base_url = u'https://www.bing.com'
         self.set_headers({'User-Agent':FAKE_USER_AGENT})
 
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
         selectors = {
             'url': 'a[href]', 
-            'title': 'a', 
+            'title': 'h2', 
             'text': 'p', 
             'links': 'ol#b_results > li.b_algo', 
             'next': 'div#b_content nav[role="navigation"] a.sb_pagN'
@@ -22,7 +22,8 @@ class Bing(SearchEngine):
     
     def _first_page(self):
         '''Returns the initial page and query.'''
-        url = u'{}/search?q={}'.format(self._base_url, self._query)
+        self._get_page(self._base_url)
+        url = u'{}/search?q={}&search=&form=QBLH'.format(self._base_url, self._query)
         return {'url':url, 'data':None}
     
     def _next_page(self, tags):
@@ -33,4 +34,3 @@ class Bing(SearchEngine):
         if next_page:
             url = (self._base_url + next_page) 
         return {'url':url, 'data':None}
-

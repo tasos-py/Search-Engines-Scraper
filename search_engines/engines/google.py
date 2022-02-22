@@ -9,6 +9,8 @@ class Google(SearchEngine):
         super(Google, self).__init__(proxy, timeout)
         self._base_url = 'https://www.google.com'
         self._delay = (2, 6)
+        self._current_page = 1
+        
         self.set_headers({'User-Agent':FAKE_USER_AGENT})
     
     def _selectors(self, element):
@@ -16,9 +18,9 @@ class Google(SearchEngine):
         selectors = {
             'url': 'a[href]', 
             'title': 'a', 
-            'text': 'span.st', 
-            'links': 'div#search div[class=g]', 
-            'next': 'div#foot a#pnnext'
+            'text': 'div[data-content-feature="1"]', 
+            'links': 'div#search div.g', 
+            'next': 'a[href][aria-label="Page {page}"]'
         }
         return selectors[element]
     
@@ -29,9 +31,12 @@ class Google(SearchEngine):
     
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
-        selector = self._selectors('next')
+        self._current_page += 1
+        selector = self._selectors('next').format(page=self._current_page)
         next_page = self._get_tag_item(tags.select_one(selector), 'href')
-        url = (self._base_url + next_page) if next_page else None
+        url = None
+        if next_page:
+            url = self._base_url + next_page
         return {'url':url, 'data':None}
 
     def _get_url(self, tag, item='href'):
@@ -42,4 +47,3 @@ class Google(SearchEngine):
         if url.startswith(u'/url?q='):
             url = url.replace(u'/url?q=', u'').split(u'&sa=')[0]
         return unquote_url(url)
-
