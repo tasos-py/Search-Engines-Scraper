@@ -1,5 +1,5 @@
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT
+from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT, USER_AGENT
 
 import re
 import json
@@ -8,11 +8,15 @@ from bs4 import BeautifulSoup
 
 class Duckduckgo(SearchEngine):
     '''Searches duckduckgo.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT, fakeagent=False):
         super(Duckduckgo, self).__init__(proxy, timeout)
         self._base_url = u'https://links.duckduckgo.com{}&biaexp=b&msvrtexp=b&videxp=a&nadse=b&tjsexp=b'
         self._main_url = u'https://duckduckgo.com/?q={}&t=h_'
         self._current_page = None
+        if fakeagent:
+            self.set_headers({'User-Agent':FAKE_USER_AGENT})
+        else:
+            self.set_headers({'User-Agent': USER_AGENT})
 
     def _selectors(self, element):
         '''Returns the appropriate CSS selector - regex pattern, in this case.'''

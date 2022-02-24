@@ -12,7 +12,7 @@ SEARCH_ENGINE_RESULTS_PAGES = 20
 TIMEOUT = 10
 
 ## Default User-Agent string 
-USER_AGENT = str(UserAgent().random)#'search_engines/0.5 Repo: https://github.com/tasos-py/Search-Engines-Scraper'
+USER_AGENT = 'search_engines/0.5 Repo: https://github.com/tasos-py/Search-Engines-Scraper'
 
 ## Fake User-Agent string - Google desn't like the default user-agent
 FAKE_USER_AGENT = str(UserAgent().random)#'Mozilla/5.0 (Windows NT 6.1; rv:84.0) Gecko/20100101 Firefox/84.0'

@@ -1,17 +1,20 @@
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
+from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT, USER_AGENT
 from ..utils import unquote_url
 
 
 class Google(SearchEngine):
     '''Searches google.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT,fakeagent=False):
         super(Google, self).__init__(proxy, timeout)
         self._base_url = 'https://www.google.com'
         self._delay = (2, 6)
         self._current_page = 1
-        
-        self.set_headers({'User-Agent':FAKE_USER_AGENT})
+
+        if fakeagent:
+            self.set_headers({'User-Agent': FAKE_USER_AGENT})
+        else:
+            self.set_headers({'User-Agent': USER_AGENT})
     
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''

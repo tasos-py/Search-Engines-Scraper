@@ -1,13 +1,38 @@
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT
+from ..config import PROXY, TIMEOUT,FAKE_USER_AGENT,USER_AGENT
 from ..utils import unquote_url
 
+'''
 
+###to get the image links from yahoo images
+url="https://images.search.yahoo.com/search/images?p=dog"
+response=requests.get(url)
+tags=BeautifulSoup(response.text, "html.parser")
+all_links=tags.findAll("a")
+
+for link in all_links:
+    extensions=['.jpg','.jpeg','.png','.gif']
+    hreflink=link.attrs['href']
+    extension=""
+    for extension in extensions:
+        if extension in hreflink:
+            print(extension)
+            templink=hreflink.split(extension)[0]+extension
+            templink=templink.split("=")[-1]
+            templink=templink.replace("%2F","/")
+            print(templink) 
+
+'''
 class Yahoo(SearchEngine):
     '''Searches yahoo.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT,fakeagent=False):
         super(Yahoo, self).__init__(proxy, timeout)
         self._base_url = 'https://search.yahoo.com'
+        self._base_img_url='https://images.search.yahoo.com'
+        if fakeagent:
+            self.set_headers({'User-Agent':FAKE_USER_AGENT})
+        else:
+            self.set_headers({'User-Agent': USER_AGENT})
     
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
@@ -19,6 +44,13 @@ class Yahoo(SearchEngine):
             'next': 'a.next'
         }
         return selectors[element]
+
+
+    def _img_first_page(self):
+        '''This is to return the first page of images'''
+        url_str = u'{}/search/images?p={}'
+        url = url_str.format(self._base_url, self._query)
+        return {'url': url, 'data': None}
     
     def _first_page(self):
         '''Returns the initial page and query.'''

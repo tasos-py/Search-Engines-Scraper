@@ -1,14 +1,17 @@
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
+from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT,USER_AGENT
 from ..utils import unquote_url
 
 
 class Dogpile(SearchEngine):
     '''Seaches dogpile.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT,fakeagent=False):
         super(Dogpile, self).__init__(proxy, timeout)
         self._base_url = 'https://www.dogpile.com'
-        self.set_headers({'User-Agent':FAKE_USER_AGENT})
+        if fakeagent:
+            self.set_headers({'User-Agent': FAKE_USER_AGENT})
+        else:
+            self.set_headers({'User-Agent': USER_AGENT})
     
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''

@@ -1,17 +1,21 @@
 from json import loads
 
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT
+from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT, USER_AGENT
 from ..utils import unquote_url
 
 
 class Qwant(SearchEngine):
     '''Searches qwant.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT,fakeagent=False):
         super(Qwant, self).__init__(proxy, timeout)
         self._base_url = u'https://api.qwant.com/v3/search/web?q={}&count=10&locale=en_US&offset={}&device=desktop&safesearch=1'
         self._offset = 0
         self._max_offset = 50
+        if fakeagent:
+            self.set_headers({'User-Agent':FAKE_USER_AGENT})
+        else:
+            self.set_headers({'User-Agent': USER_AGENT})
         
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''

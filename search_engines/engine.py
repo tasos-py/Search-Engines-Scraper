@@ -144,8 +144,10 @@ class SearchEngine(object):
                 out.console(msg, level=out.Level.warning)
             else:
                 self._filters += [operator]
-    
-    def search(self, query, pages=cfg.SEARCH_ENGINE_RESULTS_PAGES): 
+    #what I want to add is the ability to search for images. This is going to require modifications here and in each of the available engines.
+    #it may turn out that we will be unable to get image searching from certain search engines. We obviously do not want to download all the images in to memory,
+    #but instead provide them as links.
+    def search(self, query, pages=cfg.SEARCH_ENGINE_RESULTS_PAGES, searchtype="web"):
         '''Queries the search engine, goes through the pages and collects the results.
         
         :param query: str The search query  

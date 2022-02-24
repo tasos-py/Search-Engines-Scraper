@@ -1,12 +1,16 @@
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT
+from ..config import PROXY, TIMEOUT,FAKE_USER_AGENT,USER_AGENT
 
 
 class Ask(SearchEngine):
     '''Searches ask.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT,fakeagent=False):
         super(Ask, self).__init__(proxy, timeout)
         self._base_url = 'https://uk.ask.com'
+        if fakeagent:
+            self.set_headers({'User-Agent':FAKE_USER_AGENT})
+        else:
+            self.set_headers({'User-Agent': USER_AGENT})
     
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''

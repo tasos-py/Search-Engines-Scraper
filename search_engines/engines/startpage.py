@@ -1,16 +1,19 @@
 from bs4 import BeautifulSoup
 
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
+from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT,USER_AGENT
 from .. import output as out
 
 
 class Startpage(SearchEngine):
     '''Searches startpage.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT): 
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT,fakeagent=False):
         super(Startpage, self).__init__(proxy, timeout)
         self._base_url = 'https://www.startpage.com'
-        self.set_headers({'User-Agent':FAKE_USER_AGENT})
+        if fakeagent:
+            self.set_headers({'User-Agent': FAKE_USER_AGENT})
+        else:
+            self.set_headers({'User-Agent': USER_AGENT})
     
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
