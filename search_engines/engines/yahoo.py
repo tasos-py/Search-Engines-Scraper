@@ -49,7 +49,7 @@ class Yahoo(SearchEngine):
     def _img_first_page(self):
         '''This is to return the first page of images'''
         url_str = u'{}/search/images?p={}'
-        url = url_str.format(self._base_url, self._query)
+        url = url_str.format(self._base_img_url, self._query)
         return {'url': url, 'data': None}
     
     def _first_page(self):
@@ -77,4 +77,25 @@ class Yahoo(SearchEngine):
             span.decompose()
         return self._get_tag_item(title, item)
 
-    
+    def _get_images(self, soup):
+        all_links = soup.findAll("a")
+        returnlinks=[]
+        for link in all_links:
+            extensions = ['.jpg', '.jpeg', '.png', '.gif']
+            hreflink = link.attrs['href']
+            extension = ""
+            for extension in extensions:
+                if extension in hreflink:
+                    hypertexttype=hreflink.split("rurl=")[-1]
+                    hypertexttype=hypertexttype.split("%")[0]
+                    templink = hreflink.split(extension)[0] + extension
+                    templink = templink.split("=")[-1]
+                    templink = templink.replace("%2F", "/")
+                    finallink=hypertexttype+"://"+templink
+                    returnlinks.append(finallink)
+        print(returnlinks)
+        return returnlinks
+
+        ###This will return a list of links, which we will need to feed piecemeal to _item from engine.py.
+        ###similar to how _filter_results does.
+        #results=[self.item(l) for l in imglinks]
