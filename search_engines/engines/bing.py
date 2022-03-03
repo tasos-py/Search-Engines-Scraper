@@ -1,5 +1,6 @@
 from ..engine import SearchEngine
 from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT,USER_AGENT
+import ast
 
 
 class Bing(SearchEngine):
@@ -22,7 +23,13 @@ class Bing(SearchEngine):
             'next': 'div#b_content nav[role="navigation"] a.sb_pagN'
         }
         return selectors[element]
-    
+
+    def _img_first_page(self):
+        '''This is to return the first page of images'''
+        url_str = u'{}/images/search?q={}'
+        url = url_str.format(self._base_url, self._query)
+        return {'url': url, 'data': None}
+
     def _first_page(self):
         '''Returns the initial page and query.'''
         self._get_page(self._base_url)
@@ -37,3 +44,13 @@ class Bing(SearchEngine):
         if next_page:
             url = (self._base_url + next_page) 
         return {'url':url, 'data':None}
+
+    def _get_images(self, soup):
+        all_lists=soup.findAll("ul",{"class":"dgControl_list"})
+        returnlinks = []
+        for ul in all_lists:
+            childlinks=ul.findChildren('a',{"class":"iusc"})
+            for link in childlinks:
+                linktopicture=ast.literal_eval(link.attrs['m'])['murl']
+                returnlinks.append(linktopicture)
+        return returnlinks
