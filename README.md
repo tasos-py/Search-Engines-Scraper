@@ -24,7 +24,7 @@ _[Torch](http://xmh57jrzrnw6insl.onion/4a1f6b371c/search.cgi)_
  - Easy to add new search engines. You can add a new engine by creating a new class in `search_engines/engines/` and add it to the  `search_engines_dict` dictionary in `search_engines/engines/__init__.py`. The new class should subclass `SearchEngine`, and override the following methods: `_selectors`, `_first_page`, `_next_page`. 
  - Python2 - Python3 compatible.  
  - Now also supports getting URLs from Image Searches for images. Still experimental!
-
+ - You can use a randomly generated fake useragent to attempt to improve search engine scraping success
 ## Requirements  
 
 _Python 2.7 - 3.7_ with  
@@ -51,6 +51,22 @@ print(links)
 
 
 ```
+
+If you'd like to use a randomly generated useragent:
+
+```
+from search_engines import Startpage
+
+engine=Startpage(fakeagent=True)
+results=engine.search("my query")
+links=results.links()
+
+print(links)
+
+
+
+```
+
 
 If you're looking to get images:
 

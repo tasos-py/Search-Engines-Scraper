@@ -2,27 +2,6 @@ from ..engine import SearchEngine
 from ..config import PROXY, TIMEOUT,FAKE_USER_AGENT,USER_AGENT
 from ..utils import unquote_url
 
-'''
-
-###to get the image links from yahoo images
-url="https://images.search.yahoo.com/search/images?p=dog"
-response=requests.get(url)
-tags=BeautifulSoup(response.text, "html.parser")
-all_links=tags.findAll("a")
-
-for link in all_links:
-    extensions=['.jpg','.jpeg','.png','.gif']
-    hreflink=link.attrs['href']
-    extension=""
-    for extension in extensions:
-        if extension in hreflink:
-            print(extension)
-            templink=hreflink.split(extension)[0]+extension
-            templink=templink.split("=")[-1]
-            templink=templink.replace("%2F","/")
-            print(templink) 
-
-'''
 class Yahoo(SearchEngine):
     '''Searches yahoo.com'''
     def __init__(self, proxy=PROXY, timeout=TIMEOUT,fakeagent=False):
@@ -93,7 +72,6 @@ class Yahoo(SearchEngine):
                     templink = templink.replace("%2F", "/")
                     finallink=hypertexttype+"://"+templink
                     returnlinks.append(finallink)
-        print(returnlinks)
         return returnlinks
 
         ###This will return a list of links, which we will need to feed piecemeal to _item from engine.py.
