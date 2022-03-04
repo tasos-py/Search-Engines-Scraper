@@ -27,7 +27,13 @@ class Mojeek(SearchEngine):
         '''Returns the initial page and query.'''
         url = u'{}/search?q={}'.format(self._base_url, self._query)
         return {'url':url, 'data':None}
-    
+
+    def _img_first_page(self):
+        '''This is to return the first page of images'''
+        url_str = u'{}/search?q={}&fmt=images'
+        url = url_str.format(self._base_url, self._query)
+        return {'url': url, 'data': None}
+
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
         selector = self._selectors('next')
@@ -38,3 +44,14 @@ class Mojeek(SearchEngine):
         url = (self._base_url + next_page[0]) if next_page else None
         return {'url':url, 'data':None}
 
+
+    #it looks like mojeek unironically makes this easy. However, their image search
+    # seems to come from a single provider, pixabay. This seems to provide a limit
+    # based on pixabay's database of images.
+    def _get_images(self, soup):
+        all_images=soup.findAll('img')
+        returnlinks = []
+        for image in all_images:
+            if "img=http" in image.attrs['src']:
+                returnlinks.append(image.attrs['src'].split('/image?img=')[-1])
+        return returnlinks

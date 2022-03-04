@@ -15,8 +15,7 @@ class Aol(Yahoo):
     def _img_first_page(self):
         '''This is to return the first page of images'''
         url_str = u'{}/aol/image?q={}'
-        url = url_str.format(self._base_img_url, self._query)
-        print(url)
+        url = url_str.format(self._base_url, self._query)
         return {'url': url, 'data': None}
 
     def _first_page(self):

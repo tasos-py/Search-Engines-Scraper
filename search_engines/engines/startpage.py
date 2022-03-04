@@ -27,7 +27,21 @@ class Startpage(SearchEngine):
             'blocked_form': 'form#blocked_feedback_form'
         }
         return selectors[element]
-    
+
+    def _img_first_page(self):
+        '''Returns the initial page and query.'''
+        response = self._get_page(self._base_url)
+        tags = BeautifulSoup(response.html, "html.parser")
+        selector = self._selectors('search_form')
+
+        data = {
+            i['name']: i.get('value', '')
+            for i in tags.select(selector)
+        }
+        data['query'] = self._query
+        url = self._base_url + '/sp/search'
+        return {'url':url, 'data':data}
+
     def _first_page(self):
         '''Returns the initial page and query.'''
         response = self._get_page(self._base_url)
@@ -72,3 +86,7 @@ class Startpage(SearchEngine):
         msg = 'Banned' if is_blocked else ('HTTP ' + str(response.http)) if response.http else response.html
         out.console(msg, level=out.Level.error)
         return False
+
+    def _get_images(self, soup):
+        returnlinks = []
+        return returnlinks

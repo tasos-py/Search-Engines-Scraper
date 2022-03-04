@@ -73,7 +73,7 @@ If you're looking to get images:
 ```
 from search_engines import Yahoo
 
-engine = Yahoo()
+engine = Yahoo() #highly recommended to use fakeagent=True
 results=engine.search("cat",searchtype="image")
 links=results.links()
 
@@ -88,6 +88,9 @@ Currently the following Engines are supported for image search:
 * Yahoo
 * Bing
 * AOL
+* Qwant ** temperamental even with fakeagent
+* Mojeek ** works well with fakeagent flag thrown, and has pagination!
+* Google ** temperamental even with fakeagent
 
 As a CLI script:  
 

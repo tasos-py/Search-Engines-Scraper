@@ -42,6 +42,12 @@ class Duckduckgo(SearchEngine):
             return {'url':self._base_url.format(match.group(1)), 'data':None}
         return {'url':None, 'data':None}
 
+    def _img_first_page(self):
+        '''This is to return the first page of images'''
+        url_str = u'{}/?q={}&t=h_&iax=images&ia=images'
+        url = url_str.format(self._base_url, self._query)
+        return {'url': url, 'data': None}
+
     def _get_page(self, page, data=None):
         '''Gets pagination links.'''
         self._http_client.session.headers['Referer'] = 'https://duckduckgo.com/'
@@ -69,3 +75,16 @@ class Duckduckgo(SearchEngine):
         if u'host' in self._filters:
             results = [l for l in results if self._query_in(utils.domain(l['link']))]
         return results
+
+    def _get_images(self, soup):
+        #duckduckgo doesn't load images without javascript...
+        #all_lists=soup.findAll("ul",{"class":"dgControl_list"})
+        outerdiv = soup.find('div', {'id': 'zero_click_wrapper'})
+        returnlinks = []
+        #dogpile's captcha is too stronk right now
+        #for ul in all_lists:
+        #    childlinks=ul.findChildren('a',{"class":"iusc"})
+        #    for link in childlinks:
+        #        linktopicture=ast.literal_eval(link.attrs['m'])['murl']
+        #        returnlinks.append(linktopicture)
+        return returnlinks
