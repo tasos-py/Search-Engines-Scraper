@@ -87,6 +87,7 @@ print(links)
 Currently the following Engines are supported for image search:
 * Yahoo
 * Bing
+* AOL
 
 As a CLI script:  
 
