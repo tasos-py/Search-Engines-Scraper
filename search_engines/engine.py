@@ -78,7 +78,28 @@ class SearchEngine(object):
             'link': self._get_url(link), 
             'title': self._get_title(link).strip(), 
             'text': self._get_text(link).strip()
-        } 
+        }
+
+    def _img_title(self,link):
+        origimgname=link.split("/")[-1]
+        try:
+            extension=origimgname.split('.')[-1]
+            imgname=origimgname.split(extension)[0]
+            imgname=imgname.replace("_"," ")
+        except:
+            imgname=origimgname
+        return imgname
+
+    def _img_item(self, link):
+        '''Returns a dictionary of the link data.'''
+        title=self._img_title(link).strip()
+        host=utils.domain(link)
+        return {
+            'host': host,
+            'link': link,
+            'title': title,
+            'text': "Image of " + str(title) + " hosted by "+host
+        }
 
     def _query_in(self, item):
         '''Checks if query is contained in the item.'''
@@ -98,9 +119,13 @@ class SearchEngine(object):
         if u'host' in self._filters:
             results = [l for l in results if self._query_in(utils.domain(l['link']))]
         return results
-    
+
+    def _filter_img_results(self, links):
+        results=[self._img_item(l) for l in links]
+        return results
+
     def _collect_results(self, items):
-        '''Colects the search results items.''' 
+        '''Colects the search results items.'''
         for item in items:
             if not utils.is_url(item['link']):
                 continue
@@ -144,8 +169,10 @@ class SearchEngine(object):
                 out.console(msg, level=out.Level.warning)
             else:
                 self._filters += [operator]
-    
-    def search(self, query, pages=cfg.SEARCH_ENGINE_RESULTS_PAGES): 
+    #what I want to add is the ability to search for images. This is going to require modifications here and in each of the available engines.
+    #it may turn out that we will be unable to get image searching from certain search engines. We obviously do not want to download all the images in to memory,
+    #but instead provide them as links.
+    def search(self, query, pages=cfg.SEARCH_ENGINE_RESULTS_PAGES, searchtype="web"):
         '''Queries the search engine, goes through the pages and collects the results.
         
         :param query: str The search query  
@@ -154,17 +181,24 @@ class SearchEngine(object):
         '''
         out.console('Searching {}'.format(self.__class__.__name__))
         self._query = utils.decode_bytes(query)
-        request = self._first_page()
 
+        if searchtype=='web':
+            request = self._first_page()
+        elif searchtype == 'image':
+            request = self._img_first_page()
         for page in range(1, pages + 1):
             try:
                 response = self._get_page(request['url'], request['data'])
                 if not self._is_ok(response):
                     break
                 tags = BeautifulSoup(response.html, "html.parser")
-                items = self._filter_results(tags)
+                if searchtype=='web':
+                    items = self._filter_results(tags)
+                elif searchtype=='image':
+                    links=self._get_images(tags)
+                    items=self._filter_img_results(links)
                 self._collect_results(items)
-                
+
                 msg = 'page: {:<8} links: {}'.format(page, len(self.results))
                 out.console(msg, end='')
                 request = self._next_page(tags)
@@ -175,6 +209,7 @@ class SearchEngine(object):
                     sleep(random_uniform(*self._delay))
             except KeyboardInterrupt:
                 break
+
         out.console('', end='')
         return self.results
     

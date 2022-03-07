@@ -28,10 +28,21 @@ class Torch(SearchEngine):
         url_str = u'{}/search?query={}&action=search'
         url = url_str.format(self._base_url, self._query)
         return {'url':url, 'data':None}
-    
+
+    def _img_first_page(self):
+        '''Returns the initial page and query.'''
+        url_str = u'{}/search?query={}&action=search'
+        url = url_str.format(self._base_url, self._query)
+        return {'url':url, 'data':None}
+
+
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
         self._current_page += 1
         url_str = u'{}/search?query={}&page={}'
         url = url_str.format(self._base_url, self._query, self._current_page)
         return {'url':url, 'data':None}
+
+    def _get_images(self, soup):
+        returnlinks = []
+        return returnlinks

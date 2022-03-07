@@ -1,16 +1,19 @@
 from bs4 import BeautifulSoup
 
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
+from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT,USER_AGENT
 from .. import output as out
 
 
 class Startpage(SearchEngine):
     '''Searches startpage.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT): 
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT,fakeagent=False):
         super(Startpage, self).__init__(proxy, timeout)
         self._base_url = 'https://www.startpage.com'
-        self.set_headers({'User-Agent':FAKE_USER_AGENT})
+        if fakeagent:
+            self.set_headers({'User-Agent': FAKE_USER_AGENT})
+        else:
+            self.set_headers({'User-Agent': USER_AGENT})
     
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
@@ -24,7 +27,21 @@ class Startpage(SearchEngine):
             'blocked_form': 'form#blocked_feedback_form'
         }
         return selectors[element]
-    
+
+    def _img_first_page(self):
+        '''Returns the initial page and query.'''
+        response = self._get_page(self._base_url)
+        tags = BeautifulSoup(response.html, "html.parser")
+        selector = self._selectors('search_form')
+
+        data = {
+            i['name']: i.get('value', '')
+            for i in tags.select(selector)
+        }
+        data['query'] = self._query
+        url = self._base_url + '/sp/search'
+        return {'url':url, 'data':data}
+
     def _first_page(self):
         '''Returns the initial page and query.'''
         response = self._get_page(self._base_url)
@@ -69,3 +86,7 @@ class Startpage(SearchEngine):
         msg = 'Banned' if is_blocked else ('HTTP ' + str(response.http)) if response.http else response.html
         out.console(msg, level=out.Level.error)
         return False
+
+    def _get_images(self, soup):
+        returnlinks = []
+        return returnlinks
