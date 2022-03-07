@@ -81,10 +81,13 @@ class SearchEngine(object):
         }
 
     def _img_title(self,link):
-        imgname=link.split("/")[-1]
-        extension=imgname.split('.')[-1]
-        imgname=imgname.split(extension)[0]
-        imgname=imgname.replace("_"," ")
+        origimgname=link.split("/")[-1]
+        try:
+            extension=origimgname.split('.')[-1]
+            imgname=origimgname.split(extension)[0]
+            imgname=imgname.replace("_"," ")
+        except:
+            imgname=origimgname
         return imgname
 
     def _img_item(self, link):
