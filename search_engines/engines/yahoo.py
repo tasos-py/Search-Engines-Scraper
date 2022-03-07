@@ -73,7 +73,3 @@ class Yahoo(SearchEngine):
                     finallink=hypertexttype+"://"+templink
                     returnlinks.append(finallink)
         return returnlinks
-
-        ###This will return a list of links, which we will need to feed piecemeal to _item from engine.py.
-        ###similar to how _filter_results does.
-        #results=[self.item(l) for l in imglinks]

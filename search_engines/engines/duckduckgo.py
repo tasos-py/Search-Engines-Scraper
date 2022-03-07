@@ -1,6 +1,5 @@
 from ..engine import SearchEngine
 from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT, USER_AGENT
-
 import re
 import json
 from bs4 import BeautifulSoup
@@ -81,10 +80,4 @@ class Duckduckgo(SearchEngine):
         #all_lists=soup.findAll("ul",{"class":"dgControl_list"})
         outerdiv = soup.find('div', {'id': 'zero_click_wrapper'})
         returnlinks = []
-        #dogpile's captcha is too stronk right now
-        #for ul in all_lists:
-        #    childlinks=ul.findChildren('a',{"class":"iusc"})
-        #    for link in childlinks:
-        #        linktopicture=ast.literal_eval(link.attrs['m'])['murl']
-        #        returnlinks.append(linktopicture)
         return returnlinks
