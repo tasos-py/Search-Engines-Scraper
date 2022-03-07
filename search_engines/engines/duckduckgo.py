@@ -1,6 +1,5 @@
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT
-
+from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT, USER_AGENT
 import re
 import json
 from bs4 import BeautifulSoup
@@ -8,11 +7,15 @@ from bs4 import BeautifulSoup
 
 class Duckduckgo(SearchEngine):
     '''Searches duckduckgo.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT, fakeagent=False):
         super(Duckduckgo, self).__init__(proxy, timeout)
         self._base_url = u'https://links.duckduckgo.com{}&biaexp=b&msvrtexp=b&videxp=a&nadse=b&tjsexp=b'
         self._main_url = u'https://duckduckgo.com/?q={}&t=h_'
         self._current_page = None
+        if fakeagent:
+            self.set_headers({'User-Agent':FAKE_USER_AGENT})
+        else:
+            self.set_headers({'User-Agent': USER_AGENT})
 
     def _selectors(self, element):
         '''Returns the appropriate CSS selector - regex pattern, in this case.'''
@@ -37,6 +40,12 @@ class Duckduckgo(SearchEngine):
         if match:
             return {'url':self._base_url.format(match.group(1)), 'data':None}
         return {'url':None, 'data':None}
+
+    def _img_first_page(self):
+        '''This is to return the first page of images'''
+        url_str = u'{}/?q={}&t=h_&iax=images&ia=images'
+        url = url_str.format(self._base_url, self._query)
+        return {'url': url, 'data': None}
 
     def _get_page(self, page, data=None):
         '''Gets pagination links.'''
@@ -65,3 +74,10 @@ class Duckduckgo(SearchEngine):
         if u'host' in self._filters:
             results = [l for l in results if self._query_in(utils.domain(l['link']))]
         return results
+
+    def _get_images(self, soup):
+        #duckduckgo doesn't load images without javascript...
+        #all_lists=soup.findAll("ul",{"class":"dgControl_list"})
+        outerdiv = soup.find('div', {'id': 'zero_click_wrapper'})
+        returnlinks = []
+        return returnlinks

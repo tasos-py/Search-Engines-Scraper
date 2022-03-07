@@ -1,17 +1,20 @@
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
+from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT, USER_AGENT
 from ..utils import unquote_url
 
 
 class Google(SearchEngine):
     '''Searches google.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT,fakeagent=False):
         super(Google, self).__init__(proxy, timeout)
         self._base_url = 'https://www.google.com'
         self._delay = (2, 6)
         self._current_page = 1
-        
-        self.set_headers({'User-Agent':FAKE_USER_AGENT})
+
+        if fakeagent:
+            self.set_headers({'User-Agent': FAKE_USER_AGENT})
+        else:
+            self.set_headers({'User-Agent': USER_AGENT})
     
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
@@ -28,7 +31,15 @@ class Google(SearchEngine):
         '''Returns the initial page and query.'''
         url = u'{}/search?q={}'.format(self._base_url, self._query)
         return {'url':url, 'data':None}
-    
+
+    def _img_first_page(self):
+        '''This is to return the first page of images'''
+        #and google uses some cute approach where the image thumbnail is hosted by them,
+        #but you have to click on it to reveal the true URL to the true image. Neat. Thanks, Google!
+        url=u'{}/search?q={}&sxsrf=APq-WBvYIPdaNqv2AN84uB78Kl_pMr6FHQ:1646416016190&source=lnms&tbm=isch&sa=X&ved=2ahUKEwi1l7DOga32AhVmn-AKHQLJAVQQ_AUoAnoECAEQBA&biw=1700&bih=549&dpr=1'
+        url = u'{}/search?q={}'.format(self._base_url, self._query)
+        return {'url': url, 'data': None}
+
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
         self._current_page += 1
@@ -47,3 +58,12 @@ class Google(SearchEngine):
         if url.startswith(u'/url?q='):
             url = url.replace(u'/url?q=', u'').split(u'&sa=')[0]
         return unquote_url(url)
+
+    def _get_images(self, soup):
+        all_images=soup.findAll('img')
+        returnlinks = []
+        for image in all_images:
+            if 'https' in image.attrs['src']:
+                returnlinks.append(image.attrs['src'])
+
+        return returnlinks

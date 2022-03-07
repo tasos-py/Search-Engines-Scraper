@@ -1,17 +1,22 @@
 from json import loads
 
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT
+from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT, USER_AGENT
 from ..utils import unquote_url
 
 
 class Qwant(SearchEngine):
     '''Searches qwant.com'''
-    def __init__(self, proxy=PROXY, timeout=TIMEOUT):
+    def __init__(self, proxy=PROXY, timeout=TIMEOUT,fakeagent=False):
         super(Qwant, self).__init__(proxy, timeout)
         self._base_url = u'https://api.qwant.com/v3/search/web?q={}&count=10&locale=en_US&offset={}&device=desktop&safesearch=1'
         self._offset = 0
         self._max_offset = 50
+        self._base_image_url='https://www.qwant.com/?t=images'
+        if fakeagent:
+            self.set_headers({'User-Agent':FAKE_USER_AGENT})
+        else:
+            self.set_headers({'User-Agent': USER_AGENT})
         
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
@@ -22,7 +27,13 @@ class Qwant(SearchEngine):
             'links': ['data', 'result', 'items', 'mainline']
         }
         return selectors[element]
-    
+
+    def _img_first_page(self):
+        '''This is to return the first page of images'''
+        url_str = u'{}?q={}'
+        url = url_str.format(self._base_url, self._query)
+        return {'url': url, 'data': None}
+
     def _first_page(self):
         '''Returns the initial page and query.'''
         url = self._base_url.format(self._query, self._offset)
@@ -64,3 +75,13 @@ class Qwant(SearchEngine):
         if u'host' in self._filters:
             results = [l for l in results if self._query_in(utils.domain(l['link']))]
         return results
+
+    #qwant also does similar to Google. They only provide the thumbnails until you click on them.
+    #I may as well apply the same logic to both Qwant and Google then?
+    def _get_images(self, soup):
+        all_images=soup.findAll('img')
+        returnlinks = []
+        for image in all_images:
+            if "http" in image.attrs['src']:
+                returnlinks.append(image.attrs['src'])
+        return returnlinks
