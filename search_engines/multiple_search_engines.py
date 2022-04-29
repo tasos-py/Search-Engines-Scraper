@@ -25,6 +25,7 @@ class MultipleSearchEngines(object):
     
     def search(self, query, pages=cfg.SEARCH_ENGINE_RESULTS_PAGES): 
         '''Searches multiples engines and collects the results.'''
+        self.results = SearchResults()
         for engine in self._engines:
             engine.ignore_duplicate_urls = self.ignore_duplicate_urls
             engine.ignore_duplicate_domains = self.ignore_duplicate_domains
