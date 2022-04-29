@@ -6,6 +6,11 @@ import io
 import re
 from collections import namedtuple
 
+try:
+    from shutil import get_terminal_size
+except ImportError:
+    from .libs.get_terminal_size import get_terminal_size
+    
 from .utils import encode_str, decode_bytes
 from .libs import windows_cmd_encoding
 from .config import PYTHON_VERSION
@@ -94,7 +99,8 @@ def write_file(data, path, encoding='utf-8'):
 
 def console(msg, end='\n', level=None):
     '''Prints data on the console.'''
-    clear_line = '\r\x1b[2K\r'
+    console_len = get_terminal_size().columns
+    clear_line = u'\r{}\r'.format(u' ' * (console_len - 1))
     msg = clear_line + (level or u'') + msg
     print(msg, end=end)
 
