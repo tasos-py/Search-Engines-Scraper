@@ -13,6 +13,7 @@ _[Aol](https://search.aol.com)_
 _[Dogpile](https://www.dogpile.com)_  
 _[Ask](https://uk.ask.com)_  
 _[Mojeek](https://www.mojeek.com)_  
+_[Brave](https://search.brave.com/)_  
 _[Torch](http://xmh57jrzrnw6insl.onion/4a1f6b371c/search.cgi)_  
 
 ## Features  
@@ -26,7 +27,7 @@ _[Torch](http://xmh57jrzrnw6insl.onion/4a1f6b371c/search.cgi)_
 
 ## Requirements  
 
-_Python 2.7 - 3.7_ with  
+_Python 2.7 - 3.x_ with  
 _[Requests](http://docs.python-requests.org/en/master/)_ and  
 _[BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)_  
 
