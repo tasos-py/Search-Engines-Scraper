@@ -9,6 +9,7 @@ from .startpage import Startpage
 from .torch import Torch
 from .yahoo import Yahoo
 from .qwant import Qwant
+from .brave import Brave
 
 
 search_engines_dict = { 
@@ -22,5 +23,6 @@ search_engines_dict = {
     'ask': Ask, 
     'mojeek': Mojeek, 
     'qwant': Qwant, 
+    'brave': Brave,
     'torch': Torch 
 }
