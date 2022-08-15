@@ -1,2 +1,2 @@
-requests[socks]
-bs4
+requests[socks]>=2.22.0
+beautifulsoup4>=4.10.0
