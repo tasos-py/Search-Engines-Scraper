@@ -18,7 +18,8 @@ class Google(SearchEngine):
         selectors = {
             'url': 'a[href]', 
             'title': 'a', 
-            'text': 'div[data-content-feature="1"]', 
+            # 'text': 'div[data-content-feature="1"]', 
+            'text': 'div[data-sncf="1"]',
             'links': 'div#search div.g', 
             'next': 'a[href][aria-label="Page {page}"]'
         }
