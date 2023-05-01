@@ -6,7 +6,7 @@ from sys import version_info
 PYTHON_VERSION = version_info.major
 
 ## Maximum number or pages to search
-SEARCH_ENGINE_RESULTS_PAGES = 20
+SEARCH_ENGINE_RESULTS_PAGES = 1
 
 ## HTTP request timeout 
 TIMEOUT = 10
@@ -28,3 +28,5 @@ _base_dir = os_path.abspath(os_path.dirname(os_path.abspath(__file__)))
 ## Path to output files 
 OUTPUT_DIR = os_path.join(_base_dir, 'search_results') + os_path.sep
 
+# Content Type
+APPLICATION_JSON = 'application/json'

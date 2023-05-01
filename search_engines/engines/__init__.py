@@ -10,6 +10,7 @@ from .torch import Torch
 from .yahoo import Yahoo
 from .qwant import Qwant
 from .brave import Brave
+from .semantic import SemanticSchoolar
 
 
 search_engines_dict = { 
@@ -24,5 +25,6 @@ search_engines_dict = {
     'mojeek': Mojeek, 
     'qwant': Qwant, 
     'brave': Brave,
-    'torch': Torch 
+    'torch': Torch,
+    'semantic': SemanticSchoolar
 }

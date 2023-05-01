@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from time import sleep
 from random import uniform as random_uniform
 from collections import namedtuple
+import json
 
 from .results import SearchResults
 from .http_client import HttpClient
@@ -12,7 +13,7 @@ from . import config as cfg
 
 class SearchEngine(object):
     '''The base class for all Search Engines.'''
-    def __init__(self, proxy=cfg.PROXY, timeout=cfg.TIMEOUT):
+    def __init__(self, proxy=cfg.PROXY, timeout=cfg.TIMEOUT, custom_parser=None):
         '''
         :param str proxy: optional, a proxy server  
         :param int timeout: optional, the HTTP timeout
@@ -21,6 +22,7 @@ class SearchEngine(object):
         self._delay = (1, 4)
         self._query = ''
         self._filters = []
+        self.custom_parser = custom_parser
 
         self.results = SearchResults()
         '''The search results.'''
@@ -122,6 +124,7 @@ class SearchEngine(object):
         out.console(msg, level=out.Level.error)
         return False
     
+    
     def set_headers(self, headers):
         '''Sets HTTP headers.
         
@@ -162,6 +165,9 @@ class SearchEngine(object):
                 response = self._get_page(request['url'], request['data'])
                 if not self._is_ok(response):
                     break
+                if self.custom_parser is not None:
+                    self.custom_parser(response)
+                    return self.results
                 tags = BeautifulSoup(response.html, "html.parser")
                 items = self._filter_results(tags)
                 self._collect_results(items)
