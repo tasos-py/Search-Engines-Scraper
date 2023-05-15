@@ -3,3 +3,10 @@ __pycache__/
 *.html
 *.json
 *.egg-info
+
+.idea/
+.DS_Store
+.vscode/
+build/
+dist/
+*env/
