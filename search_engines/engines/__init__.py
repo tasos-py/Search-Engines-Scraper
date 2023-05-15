@@ -10,19 +10,20 @@ from .torch import Torch
 from .yahoo import Yahoo
 from .qwant import Qwant
 from .brave import Brave
+from .yandex import Yandex
 
-
-search_engines_dict = { 
-    'google': Google, 
-    'bing': Bing, 
-    'yahoo': Yahoo, 
-    'aol': Aol, 
-    'duckduckgo': Duckduckgo, 
-    'startpage': Startpage, 
-    'dogpile': Dogpile, 
-    'ask': Ask, 
-    'mojeek': Mojeek, 
-    'qwant': Qwant, 
+search_engines_dict = {
+    'google': Google,
+    'bing': Bing,
+    'yahoo': Yahoo,
+    'aol': Aol,
+    'duckduckgo': Duckduckgo,
+    'startpage': Startpage,
+    'dogpile': Dogpile,
+    'ask': Ask,
+    'mojeek': Mojeek,
+    'qwant': Qwant,
     'brave': Brave,
-    'torch': Torch 
+    'torch': Torch,
+    'yandex': Yandex,
 }
