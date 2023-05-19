@@ -2,11 +2,11 @@ import requests
 from .config import PYTHON_VERSION
 
 
-def quote_url(url):
+def quote_url(url, safe=';/?:@&=+$,#'):
     '''encodes URLs.'''
     if PYTHON_VERSION == 2:
         url = encode_str(url)
-    return requests.utils.quote(url, safe=';/?:@&=+$,#')
+    return requests.utils.quote(url, safe=safe)
 
 def unquote_url(url):
     '''decodes URLs.'''
