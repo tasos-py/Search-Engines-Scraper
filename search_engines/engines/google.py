@@ -1,6 +1,6 @@
 from ..engine import SearchEngine
 from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
-from ..utils import unquote_url
+from ..utils import unquote_url, quote_url
 
 
 class Google(SearchEngine):
@@ -12,13 +12,13 @@ class Google(SearchEngine):
         self._current_page = 1
         
         self.set_headers({'User-Agent':FAKE_USER_AGENT})
-    
+
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
         selectors = {
             'url': 'a[href]', 
             'title': 'a', 
-            'text': 'div[data-content-feature="1"]', 
+            'text': 'div[data-sncf="1"]',
             'links': 'div#search div.g', 
             'next': 'a[href][aria-label="Page {page}"]'
         }
@@ -26,7 +26,7 @@ class Google(SearchEngine):
     
     def _first_page(self):
         '''Returns the initial page and query.'''
-        url = u'{}/search?q={}'.format(self._base_url, self._query)
+        url = u'{}/search?q={}'.format(self._base_url, quote_url(self._query, ''))
         return {'url':url, 'data':None}
     
     def _next_page(self, tags):
