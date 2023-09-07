@@ -26,7 +26,7 @@ class Google(SearchEngine):
     
     def _first_page(self):
         '''Returns the initial page and query.'''
-        url = u'{}/search?q={}'.format(self._base_url, quote_url(self._query, ''))
+        url = u'{}/search?q={}&hl={}&lr=LANG_{}'.format(self._base_url, quote_url(self._query, '', "ES", "ES"))
         return {'url':url, 'data':None}
     
     def _next_page(self, tags):

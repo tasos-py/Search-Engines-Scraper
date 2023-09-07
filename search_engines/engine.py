@@ -12,12 +12,12 @@ from . import config as cfg
 
 class SearchEngine(object):
     '''The base class for all Search Engines.'''
-    def __init__(self, proxy=cfg.PROXY, timeout=cfg.TIMEOUT):
+    def __init__(self, proxy=cfg.PROXY, timeout=cfg.TIMEOUT, username: str or None = None, password: str or None = None):
         '''
         :param str proxy: optional, a proxy server  
         :param int timeout: optional, the HTTP timeout
         '''
-        self._http_client = HttpClient(timeout, proxy) 
+        self._http_client = HttpClient(timeout, proxy, username, password) 
         self._delay = (1, 4)
         self._query = ''
         self._filters = []

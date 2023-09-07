@@ -7,9 +7,10 @@ from . import utils as utl
 
 class HttpClient(object):
     '''Performs HTTP requests. A `requests` wrapper, essentialy'''
-    def __init__(self, timeout=TIMEOUT, proxy=PROXY):
+    def __init__(self, timeout=TIMEOUT, proxy=PROXY, username: str or None = None, password: str or None = None):
         self.session = requests.session()
         self.session.proxies = self._set_proxy(proxy)
+        self.session.auth = self._set_auth(username, password)
         self.session.headers['User-Agent'] = USER_AGENT
         self.session.headers['Accept-Language'] = 'en-GB,en;q=0.5'
 
@@ -50,3 +51,8 @@ class HttpClient(object):
             proxy = {'http':proxy, 'https':proxy}
         return proxy
 
+    def _set_auth(self, username: str, password: str): 
+        '''Returns HTTP Proxy Auth'''
+        if username and password: 
+            return HTTPProxyAuth(username, password)
+        return None
