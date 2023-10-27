@@ -18,7 +18,11 @@ class MultipleSearchEngines(object):
         self.ignore_duplicate_domains = False
         self.results = SearchResults()
         self.banned_engines = []
-
+    
+    def disable_console(self):
+        '''Disables console output'''
+        out.console = lambda msg, end='\n', level=None: None
+    
     def set_search_operator(self, operator):
         '''Filters search results based on the operator.'''
         self._filter = operator
