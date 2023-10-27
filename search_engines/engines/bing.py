@@ -12,7 +12,7 @@ class Bing(SearchEngine):
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
         selectors = {
-            'url': 'a[href]', 
+            'url': 'div.b_attribution cite', 
             'title': 'h2', 
             'text': 'p', 
             'links': 'ol#b_results > li.b_algo', 
@@ -34,3 +34,7 @@ class Bing(SearchEngine):
         if next_page:
             url = (self._base_url + next_page) 
         return {'url':url, 'data':None}
+
+    def _get_url(self, tag, item='href'):
+        '''Returns the URL of search results items.'''
+        return super(Bing, self)._get_url(tag, 'text')
