@@ -29,9 +29,7 @@ class Google(SearchEngine):
         url = u'{}/search?q={}'.format(self._base_url, quote_url(self._query, ''))
         response = self._get_page(url)
         bs = BeautifulSoup(response.html, "html.parser")
-
-        url = bs.select_one('noscript a')['href']
-        url = u'{}/search?{}'.format(self._base_url, url)
+        noscript_link = bs.select_one('noscript a')
         response = self._get_page(url)
         bs = BeautifulSoup(response.html, "html.parser")
 
