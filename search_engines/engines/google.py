@@ -2,6 +2,7 @@ from ..engine import SearchEngine
 from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
 from ..utils import unquote_url, quote_url
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse, parse_qs
 
 
 class Google(SearchEngine):
@@ -29,7 +30,27 @@ class Google(SearchEngine):
         url = u'{}/search?q={}'.format(self._base_url, quote_url(self._query, ''))
         response = self._get_page(url)
         bs = BeautifulSoup(response.html, "html.parser")
+        
         noscript_link = bs.select_one('noscript a')
+        if noscript_link and 'href' in noscript_link.attrs:
+            url = noscript_link['href']
+            url = u'{}/search?{}'.format(self._base_url, url)
+        else:
+            # Look for any 'a' tag with a 'data-ved' attribute
+            data_ved_link = bs.select_one('a[data-ved]')
+            if data_ved_link and 'href' in data_ved_link.attrs:
+                url = data_ved_link['href']
+                if url.startswith('/url?'):
+                    # Extract the actual URL from Google's redirect URL
+                    parsed_url = urlparse(url)
+                    query_params = parse_qs(parsed_url.query)
+                    if 'q' in query_params:
+                        url = query_params['q'][0]
+                else:
+                    url = u'{}{}'.format(self._base_url, url)
+            else:
+                print("Warning: Could not find expected 'noscript a' element or any 'a' tag with 'data-ved'. Using original URL.")
+        
         response = self._get_page(url)
         bs = BeautifulSoup(response.html, "html.parser")
 
