@@ -1,6 +1,7 @@
 from ..engine import SearchEngine
 from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
 from ..utils import unquote_url, quote_url
+from .. import output as out
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 
@@ -49,7 +50,8 @@ class Google(SearchEngine):
                 else:
                     url = u'{}{}'.format(self._base_url, url)
             else:
-                print("Warning: Could not find expected 'noscript a' element or any 'a' tag with 'data-ved'. Using original URL.")
+                msg = "Warning: Could not find expected 'noscript a' element or any 'a' tag with 'data-ved'. Using original URL."
+                out.console(msg, level=out.Level.error)
         
         response = self._get_page(url)
         bs = BeautifulSoup(response.html, "html.parser")
