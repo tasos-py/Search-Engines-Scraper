@@ -101,6 +101,7 @@ class SearchEngine(object):
     
     def _collect_results(self, items):
         '''Colects the search results items.''' 
+        collection = []
         for item in items:
             if not utils.is_url(item['link']):
                 continue
@@ -110,7 +111,9 @@ class SearchEngine(object):
                 continue
             if self.ignore_duplicate_domains and item['host'] in self.results.hosts():
                 continue
-            self.results.append(item)
+            collection.append(item)
+        self.results.extend(collection)
+        return collection
 
     def _is_ok(self, response):
         '''Checks if the HTTP response is 200 OK.'''
@@ -156,6 +159,17 @@ class SearchEngine(object):
         :param pages: int Optional, the maximum number of results pages to search  
         :returns SearchResults object
         '''
+        for _ in self.lazy_search(query, pages):
+            pass
+        return self.results
+    
+    def lazy_search(self, query, pages=cfg.SEARCH_ENGINE_RESULTS_PAGES):
+        '''Queries the search engine, goes through the pages and collects the results.
+        
+        :param query: str The search query  
+        :param pages: int Optional, the maximum number of results pages to search  
+        :returns search result dict generator
+        '''
         out.console('Searching {}'.format(self.__class__.__name__))
         self._query = utils.decode_bytes(query)
         self.results = SearchResults()
@@ -168,7 +182,7 @@ class SearchEngine(object):
                     break
                 tags = BeautifulSoup(response.html, "html.parser")
                 items = self._filter_results(tags)
-                self._collect_results(items)
+                yield from self._collect_results(items)
                 
                 msg = 'page: {:<8} links: {}'.format(page, len(self.results))
                 out.console(msg, end='')
@@ -181,7 +195,6 @@ class SearchEngine(object):
             except KeyboardInterrupt:
                 break
         out.console('', end='')
-        return self.results
     
     def output(self, output=out.PRINT, path=None):
         '''Prints search results and/or creates report files.
