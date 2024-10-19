@@ -29,7 +29,8 @@ class Yahoo(SearchEngine):
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
         selector = self._selectors('next')
-        url = self._get_tag_item(tags.select_one(selector), 'href') or None
+        next_page = self._get_tag_item(tags.select_one(selector), 'href')
+        url = self._base_url + next_page if next_page else None
         return {'url':url, 'data':None}
 
     def _get_url(self, link, item='href'):
