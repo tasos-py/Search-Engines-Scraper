@@ -1,3 +1,6 @@
+import base64
+from urllib.parse import urlparse, parse_qs        
+
 from ..engine import SearchEngine
 from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
 
@@ -12,7 +15,7 @@ class Bing(SearchEngine):
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
         selectors = {
-            'url': 'div.b_attribution cite', 
+            'url': 'h2 a', 
             'title': 'h2', 
             'text': 'p', 
             'links': 'ol#b_results > li.b_algo', 
@@ -37,4 +40,18 @@ class Bing(SearchEngine):
 
     def _get_url(self, tag, item='href'):
         '''Returns the URL of search results items.'''
-        return super(Bing, self)._get_url(tag, 'text')
+        url = super(Bing, self)._get_url(tag, 'href')
+
+        try:
+            parsed_url = urlparse(url)
+            query_params = parse_qs(parsed_url.query)
+            encoded_url = query_params["u"][0][2:]
+            # fix base64 padding
+            encoded_url += (len(encoded_url) % 4) * "="
+
+            decoded_bytes = base64.b64decode(encoded_url)
+            resp = decoded_bytes.decode('utf-8')
+        except Exception as e:
+            print(f"Error decoding Base64 string: {e}")
+
+        return resp
