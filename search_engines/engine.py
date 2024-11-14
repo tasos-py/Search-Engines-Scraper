@@ -165,7 +165,9 @@ class SearchEngine(object):
             try:
                 response = self._get_page(request['url'], request['data'])
                 if not self._is_ok(response):
-                    break
+                    msg = f"google status not ok: {response.http}"
+                    raise Exception(msg)
+
                 tags = BeautifulSoup(response.html, "html.parser")
                 items = self._filter_results(tags)
                 self._collect_results(items)

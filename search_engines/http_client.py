@@ -1,4 +1,5 @@
 import requests
+import random
 from collections import namedtuple
 
 from .config import TIMEOUT, PROXY, USER_AGENT
@@ -45,6 +46,9 @@ class HttpClient(object):
     def _set_proxy(self, proxy):
         '''Returns HTTP or SOCKS proxies dictionary.'''
         if proxy:
+            if "," in proxy:
+                proxys = [x if utl.is_url(x) else f"http://{x}"  for x in proxy.split(",") if x]
+                proxy = random.choice(proxys)
             if not utl.is_url(proxy):
                 raise ValueError('Invalid proxy format!')
             proxy = {'http':proxy, 'https':proxy}
