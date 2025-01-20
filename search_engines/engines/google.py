@@ -22,7 +22,7 @@ class Google(SearchEngine):
             'title': 'a h3', 
             'text': 'div',
             'links': 'div#main > div', 
-            'next': 'footer a[href][aria-label="Next page"]'
+            'next': 'footer a[aria-label][href^="/search?q="]'
         }
         return selectors[element]
     
