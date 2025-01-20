@@ -38,20 +38,20 @@ class Google(SearchEngine):
             url = u'{}/search?{}'.format(self._base_url, url)
         else:
             # Look for any 'a' tag with a 'data-ved' attribute
-            data_ved_link = bs.select_one('a[data-ved]')
-            if data_ved_link and 'href' in data_ved_link.attrs:
-                url = data_ved_link['href']
-                if url.startswith('/url?'):
-                    # Extract the actual URL from Google's redirect URL
-                    parsed_url = urlparse(url)
-                    query_params = parse_qs(parsed_url.query)
-                    if 'q' in query_params:
-                        url = query_params['q'][0]
-                else:
-                    url = u'{}{}'.format(self._base_url, url)
-            else:
-                msg = "Warning: Could not find expected 'noscript a' element or any 'a' tag with 'data-ved'. Using original URL."
-                out.console(msg, level=out.Level.error)
+            # data_ved_link = bs.select_one('a[data-ved]')
+            # if data_ved_link and 'href' in data_ved_link.attrs:
+            #     url = data_ved_link['href']
+            #     if url.startswith('/url?'):
+            #         # Extract the actual URL from Google's redirect URL
+            #         parsed_url = urlparse(url)
+            #         query_params = parse_qs(parsed_url.query)
+            #         if 'q' in query_params:
+            #             url = query_params['q'][0]
+            #     else:
+            #         url = u'{}{}'.format(self._base_url, url)
+            # else:
+            #     msg = "Warning: Could not find expected 'noscript a' element or any 'a' tag with 'data-ved'. Using original URL."
+            #     out.console(msg, level=out.Level.error)
         
         response = self._get_page(url)
         bs = BeautifulSoup(response.html, "html.parser")
@@ -78,8 +78,10 @@ class Google(SearchEngine):
         selector = self._selectors('url')
         url = self._get_tag_item(tag.select_one(selector), item)
 
-        if url.startswith(u'/url?q='):
-            url = url.replace(u'/url?q=', u'').split(u'&sa=')[0]
+        #if url.startswith(u'/url?q='):
+        #    url = url.replace(u'/url?q=', u'').split(u'&sa=')[0]
+        if url.startswith(u'/url?esrc='):
+            url = parse_qs(urlparse(url).query)['url'][0]
         return unquote_url(url)
 
     def _get_text(self, tag, item='text'):
