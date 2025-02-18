@@ -1,5 +1,6 @@
 from ..engine import SearchEngine
 from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
+import sys
 from ..utils import unquote_url, quote_url
 from .. import output as out
 from bs4 import BeautifulSoup
@@ -22,7 +23,7 @@ class Google(SearchEngine):
             'title': 'a h3', 
             'text': 'div',
             'links': 'div#main > div', 
-            'next': 'footer a[href][aria-label="Next page"]'
+            'next': 'footer a[aria-label][href^="/search?q="]'
         }
         return selectors[element]
     
@@ -38,20 +39,23 @@ class Google(SearchEngine):
             url = u'{}/search?{}'.format(self._base_url, url)
         else:
             # Look for any 'a' tag with a 'data-ved' attribute
-            data_ved_link = bs.select_one('a[data-ved]')
-            if data_ved_link and 'href' in data_ved_link.attrs:
-                url = data_ved_link['href']
-                if url.startswith('/url?'):
-                    # Extract the actual URL from Google's redirect URL
-                    parsed_url = urlparse(url)
-                    query_params = parse_qs(parsed_url.query)
-                    if 'q' in query_params:
-                        url = query_params['q'][0]
-                else:
-                    url = u'{}{}'.format(self._base_url, url)
-            else:
-                msg = "Warning: Could not find expected 'noscript a' element or any 'a' tag with 'data-ved'. Using original URL."
-                out.console(msg, level=out.Level.error)
+            # data_ved_link = bs.select_one('a[data-ved]')
+            # if data_ved_link and 'href' in data_ved_link.attrs:
+            #     url = data_ved_link['href']
+            #     print("@@@google data url", url, file=sys.stderr)
+            #     raise
+            #     if url.startswith('/url?'):
+            #         # Extract the actual URL from Google's redirect URL
+            #         parsed_url = urlparse(url)
+            #         query_params = parse_qs(parsed_url.query)
+            #         if 'q' in query_params:
+            #             url = query_params['q'][0]
+            #     else:
+            #         url = u'{}{}'.format(self._base_url, url)
+            # else:
+            #     msg = "Warning: Could not find expected 'noscript a' element or any 'a' tag with 'data-ved'. Using original URL."
+            #     out.console(msg, level=out.Level.error)
+            pass
         
         response = self._get_page(url)
         bs = BeautifulSoup(response.html, "html.parser")
@@ -59,6 +63,7 @@ class Google(SearchEngine):
         inputs = {i['name']:i.get('value') for i in bs.select('form input[name]') if i['name'] != 'btnI'}
         inputs['q'] = quote_url(self._query, '')
         url = u'{}/search?{}'.format(self._base_url, '&'.join([k + '=' + (v or '') for k,v in inputs.items()]))
+        #print(f"@@@ get first page {url=}", file=sys.stderr)
 
         return {'url':url, 'data':None}
     
@@ -71,6 +76,7 @@ class Google(SearchEngine):
         url = None
         if next_page:
             url = self._base_url + next_page
+        print(f"@@@ get next page {url=}", file=sys.stderr)
         return {'url':url, 'data':None}
 
     def _get_url(self, tag, item='href'):
@@ -78,8 +84,13 @@ class Google(SearchEngine):
         selector = self._selectors('url')
         url = self._get_tag_item(tag.select_one(selector), item)
 
-        if url.startswith(u'/url?q='):
-            url = url.replace(u'/url?q=', u'').split(u'&sa=')[0]
+        # import sys
+        # print("@@@google url", url, file=sys.stderr)
+
+        # if url.startswith(u'/url?q='):
+        #     url = url.replace(u'/url?q=', u'').split(u'&sa=')[0]
+        if url.startswith(u'/url?esrc='):
+            url = parse_qs(urlparse(url).query)['url'][0]
         return unquote_url(url)
 
     def _get_text(self, tag, item='text'):

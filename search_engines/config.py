@@ -18,6 +18,7 @@ USER_AGENT = 'search_engines/0.5 Repo: https://github.com/tasos-py/Search-Engine
 FAKE_USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; rv:84.0) Gecko/20100101 Firefox/84.0'
 
 ## Proxy server 
+# Example: PROXY = "1.1.1.3:8080,http://1.2.3.4:8080"
 PROXY = None
 
 ## TOR proxy server 
