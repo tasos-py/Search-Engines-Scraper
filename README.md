@@ -8,12 +8,12 @@ _[Google](https://www.google.com)_
 _[Bing](https://www.bing.com)_  
 _[Yahoo](https://search.yahoo.com)_  
 _[Duckduckgo](https://duckduckgo.com)_  
-_[Startpage](https://www.startpage.com)_  
+<del>_[Startpage](https://www.startpage.com)_</del>  
 _[Aol](https://search.aol.com)_  
-_[Dogpile](https://www.dogpile.com)_  
-_[Ask](https://uk.ask.com)_  
+<del>_[Dogpile](https://www.dogpile.com)_</del>  
+<del>_[Ask](https://uk.ask.com)_</del>  
 _[Mojeek](https://www.mojeek.com)_  
-_[Brave](https://search.brave.com/)_  
+<del>_[Brave](https://search.brave.com/)_</del>  
 _[Torch](http://xmh57jrzrnw6insl.onion/4a1f6b371c/search.cgi)_  
 
 ## Features  
