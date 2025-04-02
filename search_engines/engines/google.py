@@ -1,9 +1,7 @@
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
+from ..config import PROXY, TIMEOUT
 from ..utils import unquote_url, quote_url
-from .. import output as out
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse, parse_qs
 
 
 class Google(SearchEngine):
@@ -13,15 +11,15 @@ class Google(SearchEngine):
         self._base_url = 'https://www.google.com'
         self._delay = (2, 6)
         
-        self.set_headers({'User-Agent':FAKE_USER_AGENT})
+        self.set_headers({'User-Agent':'Lynx/2.8.6rel.5 libwww-FM/2.14'})
 
     def _selectors(self, element):
         '''Returns the appropriate CSS selector.'''
         selectors = {
-            'url': 'a[href]', 
-            'title': 'a h3', 
-            'text': 'div',
-            'links': 'div#main > div', 
+            'url': 'div > a[href]', 
+            'title': 'a', 
+            'text': 'table',
+            'links': 'item', 
             'next': 'footer a[href][aria-label="Next page"]'
         }
         return selectors[element]
@@ -29,46 +27,16 @@ class Google(SearchEngine):
     def _first_page(self):
         '''Returns the initial page and query.'''
         url = u'{}/search?q={}'.format(self._base_url, quote_url(self._query, ''))
-        response = self._get_page(url)
-        bs = BeautifulSoup(response.html, "html.parser")
-        
-        noscript_link = bs.select_one('noscript a')
-        if noscript_link and 'href' in noscript_link.attrs:
-            url = noscript_link['href']
-            url = u'{}/search?{}'.format(self._base_url, url)
-        else:
-            # Look for any 'a' tag with a 'data-ved' attribute
-            data_ved_link = bs.select_one('a[data-ved]')
-            if data_ved_link and 'href' in data_ved_link.attrs:
-                url = data_ved_link['href']
-                if url.startswith('/url?'):
-                    # Extract the actual URL from Google's redirect URL
-                    parsed_url = urlparse(url)
-                    query_params = parse_qs(parsed_url.query)
-                    if 'q' in query_params:
-                        url = query_params['q'][0]
-                else:
-                    url = u'{}{}'.format(self._base_url, url)
-            else:
-                msg = "Warning: Could not find expected 'noscript a' element or any 'a' tag with 'data-ved'. Using original URL."
-                out.console(msg, level=out.Level.error)
-        
-        response = self._get_page(url)
-        bs = BeautifulSoup(response.html, "html.parser")
-
-        inputs = {i['name']:i.get('value') for i in bs.select('form input[name]') if i['name'] != 'btnI'}
-        inputs['q'] = quote_url(self._query, '')
-        url = u'{}/search?{}'.format(self._base_url, '&'.join([k + '=' + (v or '') for k,v in inputs.items()]))
-
+        page = self._get_page(url)
+        self._check_consent(page)
         return {'url':url, 'data':None}
     
     def _next_page(self, tags):
         '''Returns the next page URL and post data (if any)'''
-        #tags = self._check_consent(tags)
-        tag = tags.select_one(self._selectors('next'))
+        tag = tags.select('table a[href*="start="]')[-1]
         next_page = self._get_tag_item(tag, 'href')
-
         url = None
+
         if next_page:
             url = self._base_url + next_page
         return {'url':url, 'data':None}
@@ -85,7 +53,7 @@ class Google(SearchEngine):
     def _get_text(self, tag, item='text'):
         '''Returns the text of search results items.'''
         tag = tag.select_one(self._selectors('text'))
-        return '\n'.join(list(tag.stripped_strings)[2:]) if tag else ''
+        return tag.text if tag else ''
 
     def _check_consent(self, page):
         '''Checks if cookies consent is required'''
@@ -96,9 +64,9 @@ class Google(SearchEngine):
             data = {i['name']:i.get('value') for i in consent_form if i['name'] not in ['set_sc', 'set_aps']}
             page = self._get_page(url, data)
         return page
-
-    def _get_page(self, page, data=None):
-        '''Gets pagination links.'''
-        page = super(Google, self)._get_page(page, data)
-        page = self._check_consent(page)
-        return page
+    
+    def _filter_results(self, soup):
+        '''Processes and filters the search results.''' 
+        tags = [i.find_parent('div').find_parent('div') for i in soup.select('div a[href^="/url?q="]')][:-1]
+        soup = BeautifulSoup(''.join('<item>' + str(i) + '</item>' for i in tags), "html.parser")
+        return super(Google, self)._filter_results(soup)
