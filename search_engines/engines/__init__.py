@@ -2,7 +2,7 @@ from .aol import Aol
 from .ask import Ask
 from .bing import Bing
 from .dogpile import Dogpile
-from .duckduckgo import Duckduckgo
+from .duckduckgo_html import Duckduckgo
 from .google import Google
 from .mojeek import Mojeek
 from .startpage import Startpage
